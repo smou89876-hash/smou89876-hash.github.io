@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="斯谋 — 搜索与策略运营，数据驱动的一线实践者与互联网行业观察者" />
+  <title>斯谋 · 搜索与策略运营</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep: #030712;
+      --bg-panel: rgba(15, 23, 42, 0.65);
+      --border: rgba(56, 189, 248, 0.15);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --cyan: #22d3ee;
+      --cyan-dim: rgba(34, 211, 238, 0.12);
+      --violet: #a78bfa;
+      --glow: 0 0 40px rgba(34, 211, 238, 0.15);
+      --font-sans: "Outfit", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, monospace;
+      --radius: 14px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg-deep);
+      overflow-x: hidden;
+    }
+
+    /* 背景：网格 + 光晕 */
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(34, 211, 238, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 70%);
+    }
+
+    .bg-glow {
+      position: absolute;
+      width: 120%;
+      height: 60%;
+      top: -20%;
+      left: -10%;
+      background: radial-gradient(ellipse at center, rgba(34, 211, 238, 0.08) 0%, transparent 55%);
+    }
+
+    .bg-glow-2 {
+      position: absolute;
+      width: 80%;
+      height: 50%;
+      bottom: -10%;
+      right: -15%;
+      background: radial-gradient(ellipse at center, rgba(167, 139, 250, 0.06) 0%, transparent 50%);
+    }
+
+    .scanlines {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+      opacity: 0.4;
+    }
+
+    a {
+      color: var(--cyan);
+      text-decoration: none;
+      transition: color 0.2s var(--ease);
+    }
+
+    a:hover {
+      color: #67e8f9;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px 96px;
+    }
+
+    /* 导航 */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 20px 0;
+      backdrop-filter: blur(12px);
+      background: linear-gradient(to bottom, rgba(3, 7, 18, 0.9), rgba(3, 7, 18, 0.5), transparent);
+      border-bottom: 1px solid transparent;
+    }
+
+    .nav-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .logo {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .logo span {
+      color: var(--cyan);
+    }
+
+    nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav a {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    nav a:hover {
+      color: var(--cyan);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 72px 0 88px;
+      display: grid;
+      gap: 48px;
+      align-items: center;
+    }
+
+    @media (min-width: 900px) {
+      .hero {
+        grid-template-columns: 1.1fr 0.9fr;
+        padding: 96px 0 112px;
+      }
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--cyan-dim);
+      margin-bottom: 24px;
+    }
+
+    .badge::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero h1 {
+      margin: 0 0 16px;
+      font-size: clamp(2.25rem, 5vw, 3.25rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #f8fafc 0%, #94a3b8 45%, #22d3ee 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-lead {
+      margin: 0 0 32px;
+      font-size: 1.0625rem;
+      color: var(--muted);
+      max-width: 36ch;
+    }
+
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 22px;
+      font-family: var(--font-sans);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0891b2, #06b6d4);
+      color: #0f172a;
+      box-shadow: var(--glow);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 48px rgba(34, 211, 238, 0.35);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(34, 211, 238, 0.4);
+      color: var(--text);
+    }
+
+    .hero-card {
+      position: relative;
+      padding: 28px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.4), transparent 40%, rgba(167, 139, 250, 0.25));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .hero-card-header {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: var(--font-mono);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--cyan);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .hero-card-footer {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 0.8125rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+    }
+
+    /* Section */
+    section {
+      padding: 64px 0;
+    }
+
+    .section-head {
+      margin-bottom: 40px;
+    }
+
+    .section-kicker {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .section-desc {
+      margin: 12px 0 0;
+      max-width: 52ch;
+      color: var(--muted);
+    }
+
+    /* About */
+    .about-grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .about-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .about-card {
+      padding: 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.4);
+      transition: border-color 0.25s var(--ease), transform 0.25s var(--ease);
+    }
+
+    .about-card:hover {
+      border-color: rgba(34, 211, 238, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .about-card h3 {
+      margin: 0 0 12px;
+      font-size: 1.0625rem;
+      font-weight: 600;
+    }
+
+    .about-card p {
+      margin: 0;
+      font-size: 0.9375rem;
+      color: var(--muted);
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 28px;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--cyan), var(--violet));
+      opacity: 0.35;
+      border-radius: 2px;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: 36px;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -24px;
+      top: 6px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--bg-deep);
+      border: 2px solid var(--cyan);
+      box-shadow: 0 0 12px rgba(34, 211, 238, 0.5);
+    }
+
+    .timeline-meta {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--cyan);
+      margin-bottom: 6px;
+    }
+
+    .timeline-item h3 {
+      margin: 0 0 8px;
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .timeline-item p {
+      margin: 0;
+      font-size: 0.9375rem;
+      color: var(--muted);
+    }
+
+    /* Skills */
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .skill-tag {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(34, 211, 238, 0.05);
+      color: var(--text);
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .skill-tag:hover {
+      border-color: rgba(34, 211, 238, 0.35);
+      background: rgba(34, 211, 238, 0.1);
+    }
+
+    /* Project cards */
+    .project-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .project-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .project-card {
+      padding: 22px 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.35);
+      transition: border-color 0.25s var(--ease), transform 0.25s var(--ease);
+    }
+
+    .project-card:hover {
+      border-color: rgba(34, 211, 238, 0.22);
+      transform: translateY(-2px);
+    }
+
+    .project-card h3 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .project-card p {
+      margin: 0;
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .project-tag {
+      display: inline-block;
+      margin-top: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      opacity: 0.85;
+    }
+
+    /* Contact */
+    .contact-box {
+      padding: 40px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.8), rgba(3, 7, 18, 0.9));
+      text-align: center;
+    }
+
+    .contact-box p {
+      margin: 0 0 20px;
+      color: var(--muted);
+      max-width: 40ch;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .contact-email {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      color: var(--cyan);
+    }
+
+    .contact-extra {
+      margin-top: 16px;
+      margin-bottom: 0;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .contact-extra code {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--text);
+    }
+
+    footer {
+      padding: 48px 24px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* Reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-layer" aria-hidden="true">
+    <div class="bg-glow"></div>
+    <div class="bg-glow-2"></div>
+    <div class="bg-grid"></div>
+    <div class="scanlines"></div>
+  </div>
+
+  <header>
+    <div class="nav-inner">
+      <a class="logo" href="#">SIMON<span>.</span>斯谋</a>
+      <nav aria-label="主导航">
+        <ul>
+          <li><a href="#about">关于</a></li>
+          <li><a href="#experience">经历</a></li>
+          <li><a href="#projects">项目</a></li>
+          <li><a href="#skills">技能</a></li>
+          <li><a href="#contact">联系</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero" id="top">
+      <div>
+        <div class="badge">搜索 · 策略运营 · 数据与 AI</div>
+        <h1>在搜索与交易的一线，做可验证的增长</h1>
+        <p class="hero-lead">
+          深耕 O2O 电商搜索与数字营销数据化多年：从指标体系、Badcase 到策略实验与 LLM 评测闭环，习惯用数据说话，也习惯站在用户意图与行业趋势之间做观察与落地。
+        </p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#contact">取得联系</a>
+          <a class="btn btn-ghost" href="#experience">查看经历</a>
+        </div>
+      </div>
+      <div class="hero-card reveal">
+        <div class="hero-card-header">// 概览 · SNAPSHOT</div>
+        <div class="stat-row">
+          <div>
+            <div class="stat-num">4+</div>
+            <div class="stat-label">年一线实践</div>
+          </div>
+          <div>
+            <div class="stat-num">2</div>
+            <div class="stat-label">段核心履历</div>
+          </div>
+          <div>
+            <div class="stat-num">∞</div>
+            <div class="stat-label">实验与迭代</div>
+          </div>
+        </div>
+        <div class="hero-card-footer">
+          &gt; 角色：搜索运营 · 数据分析 · 策略协同<br />
+          &gt; 坐标：深圳 · 关注杭州 / 上海机会
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="section-head reveal">
+        <p class="section-kicker">01 · ABOUT</p>
+        <h2 class="section-title">关于我</h2>
+        <p class="section-desc">
+          介于业务目标与用户意图之间：既在一线推动可量化的搜索与增长结果，也保持对平台、数据与 AI 演进的外部观察。本科计算机背景，为沟通产品与算法提供共同语言。
+        </p>
+      </div>
+      <div class="about-grid">
+        <article class="about-card reveal">
+          <h3>搜索全链路</h3>
+          <p>熟悉从指标、Badcase、相关性治理到实验上线与全量推广的路径；参与 LLM 在搜索评测与策略迭代中的落地，推动从抽检走向规模化闭环。</p>
+        </article>
+        <article class="about-card reveal">
+          <h3>用户与意图</h3>
+          <p>关注搜索与交易背后的意图本质，擅长结合行为路径做场景词、导航与供需匹配优化，降低决策成本、拉长流量价值。</p>
+        </article>
+        <article class="about-card reveal">
+          <h3>数据驱动</h3>
+          <p>多年数据分析与看板建设经验，习惯用下钻、漏斗与异动归因缩短「波动 → 根因 → 动作」的闭环；在营销与中台场景沉淀过通用取数能力。</p>
+        </article>
+        <article class="about-card reveal">
+          <h3>AI 时代的实践者</h3>
+          <p>对 AI 能力与边界有清醒认知，在日常策略与评测工作中「充分且必要」地运用 AI，同时保持对行业趋势与产品形态的个人观察。</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="experience">
+      <div class="section-head reveal">
+        <p class="section-kicker">02 · EXPERIENCE</p>
+        <h2 class="section-title">从业经历</h2>
+        <p class="section-desc">
+          两段主线：上市互联网公司的数字营销数据化，以及大型零售 O2O 的搜索策略与体验。以下为高度概括的职务重心，代表性项目见下一节。
+        </p>
+      </div>
+      <div class="timeline reveal">
+        <div class="timeline-item">
+          <div class="timeline-meta">2024.11 — 至今 · 沃尔玛（中国）· 深圳</div>
+          <h3>搜索运营 · O2O 电商</h3>
+          <p>
+            主导搜索相关性治理体系：定义分级评价标准，引入 LLM 构建规模化评测闭环，将 Badcase 的语义特征沉淀为可泛化的策略逻辑，推动从人力抽检到算法自检的效率升级；策略全量后带来可观测的业务增益。
+            协同算法、产品与类目，重构场景词标签与召回排序，缓解模糊意图下的供需错配；从 0 搭建搜索全链路监控与异动归因框架，并上线结果页动态导航等体验优化。联动搜索数据反哺采购与营运，显著压低线上缺货率。
+          </p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-meta">2021.07 — 2024.11 · 杭州兑吧网络科技（上市）· 杭州</div>
+          <h3>数据分析 · 数字营销</h3>
+          <p>
+            参与零售品牌一物一码与私域增长体系：推动触点数字化与公域向私域导流，服务头部客户时曾带动 DAU 量级提升并沉淀十万级私域资产。深度参与企业数据中台与通用活动看板建设，用 SQL、BI 与标准化指标将业务响应压缩到小时级。
+            对积分商城 SaaS 用户做 RFM 与聚类分层，输出精细化权益与召回策略；建立营销 ROI 与异动根因分析框架，减少预算浪费、支撑可迭代决策。
+          </p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-meta">2017 — 2021 · 宁波财经学院</div>
+          <h3>计算机科学与技术 · 本科</h3>
+          <p>工科训练为后续数据、产品与算法协作打下基础；毕业至今持续在「互联网一线交付 + 行业观察」双线并行。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="section-head reveal">
+        <p class="section-kicker">03 · PROJECTS</p>
+        <h2 class="section-title">关键项目与结果</h2>
+        <p class="section-desc">选取若干可公开概括的代表作：侧重问题定义、协作方式与可验证结果，而非内部细节。</p>
+      </div>
+      <div class="project-grid reveal">
+        <article class="project-card">
+          <h3>搜索相关性治理与 LLM 评测闭环</h3>
+          <p>搭建三级评价标准与规模化评测机制，将语义 Badcase 抽象为可复用策略；策略全量后搜索加购率、UV 价值等核心指标在实验窗口内取得正向表现。</p>
+          <span class="project-tag">沃尔玛 · 搜索策略</span>
+        </article>
+        <article class="project-card">
+          <h3>场景词与意图匹配升级</h3>
+          <p>针对模糊意图词转化偏低的问题，联合算法与类目运营重构标签与排序逻辑，提升意图识别精度，头部场景词搜索转化率实现可观增长。</p>
+          <span class="project-tag">沃尔玛 · 供需匹配</span>
+        </article>
+        <article class="project-card">
+          <h3>一物一码营销与私域增长</h3>
+          <p>主导零售品牌全链路一物一码体系设计，以触点数字化打通公域到私域；服务某头部乳企时，活动周期内 DAU 显著翻倍，并沉淀大规模可运营私域用户池。</p>
+          <span class="project-tag">兑吧 · 用户增长</span>
+        </article>
+        <article class="project-card">
+          <h3>数据中台与精细化运营</h3>
+          <p>基于 SQL 与 BI 构建通用活动看板与中台能力，降低运营与产品取数门槛；结合 RFM 与聚类输出分层策略，在目标客群中实现复购率双位数提升。</p>
+          <span class="project-tag">兑吧 · 数据运营</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="skills">
+      <div class="section-head reveal">
+        <p class="section-kicker">04 · SKILLS</p>
+        <h2 class="section-title">技能与工具</h2>
+        <p class="section-desc">围绕搜索策略、数据与跨团队协作的实际栈，持续按业务需要扩展。</p>
+      </div>
+      <div class="skills reveal">
+        <span class="skill-tag">搜索策略 · 相关性治理</span>
+        <span class="skill-tag">Badcase 分析 · 意图与场景词</span>
+        <span class="skill-tag">A/B 实验与指标设计</span>
+        <span class="skill-tag">SQL</span>
+        <span class="skill-tag">BI 看板 · 数据可视化</span>
+        <span class="skill-tag">异动归因 · 漏斗下钻</span>
+        <span class="skill-tag">RFM · 用户分层</span>
+        <span class="skill-tag">LLM 评测与搜索落地</span>
+        <span class="skill-tag">数字营销 · 增长活动</span>
+        <span class="skill-tag">数据中台协作</span>
+        <span class="skill-tag">跨职能协同（算法 / 产品 / 运营）</span>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="section-head reveal">
+        <p class="section-kicker">05 · CONTACT</p>
+        <h2 class="section-title">联系</h2>
+      </div>
+      <div class="contact-box reveal">
+        <p>若有搜索策略、数据分析或增长相关交流，欢迎邮件联系。</p>
+        <a class="contact-email" href="mailto:13282203639@163.com">13282203639@163.com</a>
+        <p class="contact-extra">微信：<code>simon-inter0204</code></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© <span id="y"></span> · 斯谋 · 个人主页</p>
+  </footer>
+
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) e.target.classList.add("visible");
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+
+    document.querySelectorAll(".reveal").forEach(function (el) {
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
