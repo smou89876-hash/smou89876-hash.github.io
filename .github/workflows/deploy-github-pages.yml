@@ -1,5 +1,5 @@
-# 推送到 main 后，将 personal/ 静态站点发布到 GitHub Pages。
-# 仓库 Settings → Pages → Build and deployment → Source 选择 “GitHub Actions”。
+# 推送到 main 后，将仓库根目录静态文件发布到 GitHub Pages（根目录须有 index.html）。
+# 仓库 Settings → Pages：可选 “GitHub Actions”，或 “Deploy from a branch” → main → / (root)。
 
 name: Deploy to GitHub Pages
 
@@ -33,7 +33,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: personal
+          path: .
 
       - name: Deploy to GitHub Pages
         id: deployment
