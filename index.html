@@ -585,6 +585,203 @@
       border-top: 1px solid var(--border);
     }
 
+    /* Live dashboard card */
+    .live-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .live-header-label {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 0.625rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #4ade80;
+      border: 1px solid rgba(74, 222, 128, 0.25);
+      background: rgba(74, 222, 128, 0.08);
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+
+    .live-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 6px #4ade80;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .live-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 18px 0;
+    }
+
+    .live-metrics {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .live-metric-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .live-metric-key {
+      color: var(--muted);
+    }
+
+    .live-metric-val {
+      color: var(--cyan);
+      font-weight: 600;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .live-metric-val.green { color: #4ade80; }
+    .live-metric-val.violet { color: var(--violet); }
+
+    .live-trend {
+      font-size: 0.65rem;
+      margin-left: 4px;
+      opacity: 0.7;
+    }
+
+    .live-footer {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .live-timestamp {
+      color: rgba(34, 211, 238, 0.5);
+      font-size: 0.6875rem;
+    }
+
+    /* Radar chart */
+    .radar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .radar-canvas-box {
+      position: relative;
+      width: 460px;
+      max-width: 100%;
+    }
+
+    #radarChart {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .radar-hint {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      opacity: 0.7;
+    }
+
+    .radar-tooltip-box {
+      position: fixed;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(34, 211, 238, 0.35);
+      border-radius: 10px;
+      padding: 10px 16px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 200;
+      white-space: nowrap;
+      backdrop-filter: blur(12px);
+    }
+
+    .radar-tooltip-box.show { opacity: 1; }
+
+    .radar-tooltip-name {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+
+    .radar-tooltip-score {
+      font-family: var(--font-mono);
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .radar-tooltip-desc {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* Timeline list */
+    .timeline-list {
+      margin: 10px 0 0;
+      padding: 0 0 0 18px;
+      list-style: none;
+    }
+
+    .timeline-list li {
+      position: relative;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+
+    .timeline-list li::before {
+      content: "›";
+      position: absolute;
+      left: -14px;
+      color: var(--cyan);
+      opacity: 0.7;
+    }
+
+    .timeline-list strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .project-card strong {
+      color: var(--cyan);
+      font-weight: 600;
+    }
+
     /* Reveal */
     .reveal {
       opacity: 0;
@@ -627,7 +824,7 @@
         <div class="badge">搜索 · 策略运营 · 数据与 AI</div>
         <h1>在搜索与交易的一线，做可验证的增长</h1>
         <p class="hero-lead">
-          深耕 O2O 电商搜索与数字营销数据化多年：从指标体系、Badcase 到策略实验与 LLM 评测闭环，习惯用数据说话，也习惯站在用户意图与行业趋势之间做观察与落地。
+          4 年 O2O 电商搜索与数字营销实战：LLM 评测闭环、Badcase 治理到可量化增长落地。计算机背景，擅长跨越运营、产品与算法的语言边界。
         </p>
         <div class="hero-cta">
           <a class="btn btn-primary" href="#contact">取得联系</a>
@@ -662,25 +859,25 @@
         <p class="section-kicker">01 · ABOUT</p>
         <h2 class="section-title">关于我</h2>
         <p class="section-desc">
-          介于业务目标与用户意图之间：既在一线推动可量化的搜索与增长结果，也保持对平台、数据与 AI 演进的外部观察。本科计算机背景，为沟通产品与算法提供共同语言。
+          搜索策略 × 数据分析 × AI 落地。计算机背景，能在运营、产品与算法之间充当共同语言。
         </p>
       </div>
       <div class="about-grid">
         <article class="about-card reveal">
           <h3>搜索全链路</h3>
-          <p>熟悉从指标、Badcase、相关性治理到实验上线与全量推广的路径；参与 LLM 在搜索评测与策略迭代中的落地，推动从抽检走向规模化闭环。</p>
+          <p>从指标定义、Badcase 治理到策略实验全量，引入 LLM 将规模化评测闭环从人力抽检升级为算法自检。</p>
         </article>
         <article class="about-card reveal">
-          <h3>用户与意图</h3>
-          <p>关注搜索与交易背后的意图本质，擅长结合行为路径做场景词、导航与供需匹配优化，降低决策成本、拉长流量价值。</p>
+          <h3>用户意图与供需匹配</h3>
+          <p>以意图为锚点深耕场景词与排序优化，头部模糊词搜索转化率与 UV 价值均有可观测提升。</p>
         </article>
         <article class="about-card reveal">
           <h3>数据驱动</h3>
-          <p>多年数据分析与看板建设经验，习惯用下钻、漏斗与异动归因缩短「波动 → 根因 → 动作」的闭环；在营销与中台场景沉淀过通用取数能力。</p>
+          <p>SQL + BI 全链路看板，将「波动 → 根因 → 动作」压缩至小时级响应；RFM 分层支撑精细化运营决策。</p>
         </article>
         <article class="about-card reveal">
-          <h3>AI 时代的实践者</h3>
-          <p>对 AI 能力与边界有清醒认知，在日常策略与评测工作中「充分且必要」地运用 AI，同时保持对行业趋势与产品形态的个人观察。</p>
+          <h3>AI 落地实践</h3>
+          <p>在搜索评测中系统引入 LLM 提效，保持对 AI 边界的清醒认知——用 AI 增强判断，而非替代判断。</p>
         </article>
       </div>
     </section>
@@ -697,18 +894,23 @@
         <div class="timeline-item">
           <div class="timeline-meta">2024.11 — 至今 · 沃尔玛（中国）· 深圳</div>
           <h3>搜索运营 · O2O 电商</h3>
-          <p>
-            主导搜索相关性治理体系：定义分级评价标准，引入 LLM 构建规模化评测闭环，将 Badcase 的语义特征沉淀为可泛化的策略逻辑，推动从人力抽检到算法自检的效率升级；策略全量后带来可观测的业务增益。
-            协同算法、产品与类目，重构场景词标签与召回排序，缓解模糊意图下的供需错配；从 0 搭建搜索全链路监控与异动归因框架，并上线结果页动态导航等体验优化。联动搜索数据反哺采购与营运，显著压低线上缺货率。
-          </p>
+          <ul class="timeline-list">
+            <li>建立三级搜索相关性评价标准，引入 LLM 构建规模化评测闭环，推动从人力抽检升级为算法自检</li>
+            <li>策略全量后<strong>加购率与 UV 价值</strong>在实验窗口内取得正向提升</li>
+            <li>联合算法与类目重构场景词标签与召回排序，缓解模糊意图下的供需错配</li>
+            <li>从 0 搭建搜索全链路监控与异动归因体系，上线结果页动态导航</li>
+            <li>搜索数据反哺采购与营运，<strong>显著压低线上缺货率</strong></li>
+          </ul>
         </div>
         <div class="timeline-item">
           <div class="timeline-meta">2021.07 — 2024.11 · 杭州兑吧网络科技（上市）· 杭州</div>
           <h3>数据分析 · 数字营销</h3>
-          <p>
-            参与零售品牌一物一码与私域增长体系：推动触点数字化与公域向私域导流，服务头部客户时曾带动 DAU 量级提升并沉淀十万级私域资产。深度参与企业数据中台与通用活动看板建设，用 SQL、BI 与标准化指标将业务响应压缩到小时级。
-            对积分商城 SaaS 用户做 RFM 与聚类分层，输出精细化权益与召回策略；建立营销 ROI 与异动根因分析框架，减少预算浪费、支撑可迭代决策。
-          </p>
+          <ul class="timeline-list">
+            <li>主导一物一码全链路体系，服务头部乳企活动周期内 <strong>DAU 翻倍</strong>，沉淀<strong>十万级</strong>可运营私域用户</li>
+            <li>SQL + BI 构建数据中台与通用看板，业务响应压缩至<strong>小时级</strong></li>
+            <li>RFM + 聚类用户分层，精细化权益策略带动目标客群<strong>复购率双位数提升</strong></li>
+            <li>建立营销 ROI 与异动根因分析框架，支撑可迭代预算决策</li>
+          </ul>
         </div>
         <div class="timeline-item">
           <div class="timeline-meta">2017 — 2021 · 宁波财经学院</div>
@@ -727,22 +929,22 @@
       <div class="project-grid reveal">
         <article class="project-card">
           <h3>搜索相关性治理与 LLM 评测闭环</h3>
-          <p>搭建三级评价标准与规模化评测机制，将语义 Badcase 抽象为可复用策略；策略全量后搜索加购率、UV 价值等核心指标在实验窗口内取得正向表现。</p>
+          <p>三级评价标准 + LLM 规模化评测，Badcase 语义特征沉淀为可复用策略。结果：<strong>加购率与 UV 价值双升</strong>，人力抽检成本大幅降低。</p>
           <span class="project-tag">沃尔玛 · 搜索策略</span>
         </article>
         <article class="project-card">
           <h3>场景词与意图匹配升级</h3>
-          <p>针对模糊意图词转化偏低的问题，联合算法与类目运营重构标签与排序逻辑，提升意图识别精度，头部场景词搜索转化率实现可观增长。</p>
+          <p>联合算法与类目运营重构标签与召回排序，精准承接模糊意图流量。结果：<strong>头部场景词搜索转化率可观增长</strong>，供需错配显著缓解。</p>
           <span class="project-tag">沃尔玛 · 供需匹配</span>
         </article>
         <article class="project-card">
           <h3>一物一码营销与私域增长</h3>
-          <p>主导零售品牌全链路一物一码体系设计，以触点数字化打通公域到私域；服务某头部乳企时，活动周期内 DAU 显著翻倍，并沉淀大规模可运营私域用户池。</p>
+          <p>触点数字化打通公域到私域全链路。结果：服务头部乳企活动周期内 <strong>DAU 翻倍</strong>，沉淀<strong>十万级</strong>可运营私域用户池。</p>
           <span class="project-tag">兑吧 · 用户增长</span>
         </article>
         <article class="project-card">
           <h3>数据中台与精细化运营</h3>
-          <p>基于 SQL 与 BI 构建通用活动看板与中台能力，降低运营与产品取数门槛；结合 RFM 与聚类输出分层策略，在目标客群中实现复购率双位数提升。</p>
+          <p>SQL + BI 通用看板降低全员取数门槛；RFM 分层精细化权益策略。结果：业务响应压缩至<strong>小时级</strong>，目标客群<strong>复购率双位数提升</strong>。</p>
           <span class="project-tag">兑吧 · 数据运营</span>
         </article>
       </div>
@@ -754,6 +956,14 @@
         <h2 class="section-title">技能与工具</h2>
         <p class="section-desc">围绕搜索策略、数据与跨团队协作的实际栈，持续按业务需要扩展。</p>
       </div>
+      <div class="radar-wrap reveal">
+        <div class="radar-canvas-box">
+          <canvas id="radarChart" width="460" height="460"></canvas>
+        </div>
+        <p class="radar-hint">// 悬停节点查看技能详情</p>
+      </div>
+      <div id="radarTooltip" class="radar-tooltip-box"></div>
+
       <div class="skills reveal">
         <span class="skill-tag">搜索策略 · 相关性治理</span>
         <span class="skill-tag">Badcase 分析 · 意图与场景词</span>
@@ -801,6 +1011,171 @@
     document.querySelectorAll(".reveal").forEach(function (el) {
       observer.observe(el);
     });
+
+    // Radar Chart
+    (function () {
+      var data = [
+        { name: "数据分析", score: 88, desc: "SQL · BI · 异动归因 · RFM 分层" },
+        { name: "运营策略", score: 85, desc: "搜索运营 · 增长活动 · A/B 实验" },
+        { name: "用户洞察", score: 80, desc: "意图分析 · 行为路径 · 场景词研究" },
+        { name: "AI 应用",  score: 78, desc: "LLM 评测 · 搜索落地 · Prompt 工程" },
+        { name: "技术理解", score: 72, desc: "CS 背景 · 算法协同 · 系统架构理解" },
+        { name: "产品思维", score: 68, desc: "需求拆解 · 指标体系 · 跨职能协作" },
+      ];
+
+      var canvas = document.getElementById("radarChart");
+      if (!canvas || !canvas.getContext) return;
+
+      var dpr = window.devicePixelRatio || 1;
+      var SIZE = 460;
+      canvas.width  = SIZE * dpr;
+      canvas.height = SIZE * dpr;
+      canvas.style.width  = SIZE + "px";
+      canvas.style.height = SIZE + "px";
+
+      var ctx = canvas.getContext("2d");
+      ctx.scale(dpr, dpr);
+
+      var cx = SIZE / 2, cy = SIZE / 2;
+      var R = SIZE * 0.33;
+      var N = data.length;
+      var LEVELS = 4;
+      var prog = 0, animating = false, hover = -1;
+
+      function ang(i) { return (Math.PI * 2 * i / N) - Math.PI / 2; }
+      function pt(i, r) { return { x: cx + r * Math.cos(ang(i)), y: cy + r * Math.sin(ang(i)) }; }
+
+      function draw(p) {
+        ctx.clearRect(0, 0, SIZE, SIZE);
+
+        // Grid rings
+        for (var l = 1; l <= LEVELS; l++) {
+          ctx.beginPath();
+          for (var i = 0; i < N; i++) {
+            var gp = pt(i, R * l / LEVELS);
+            i === 0 ? ctx.moveTo(gp.x, gp.y) : ctx.lineTo(gp.x, gp.y);
+          }
+          ctx.closePath();
+          ctx.strokeStyle = l === LEVELS
+            ? "rgba(34,211,238,0.18)"
+            : "rgba(34,211,238,0.07)";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+
+        // Axis lines
+        for (var i = 0; i < N; i++) {
+          var ep = pt(i, R);
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(ep.x, ep.y);
+          ctx.strokeStyle = "rgba(34,211,238,0.12)";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+
+        // Data fill
+        ctx.beginPath();
+        for (var i = 0; i < N; i++) {
+          var dp = pt(i, R * (data[i].score / 100) * p);
+          i === 0 ? ctx.moveTo(dp.x, dp.y) : ctx.lineTo(dp.x, dp.y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = "rgba(34,211,238,0.1)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(34,211,238,0.65)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Dots & labels
+        for (var i = 0; i < N; i++) {
+          var isHov = i === hover;
+          var dp = pt(i, R * (data[i].score / 100) * p);
+
+          // Glow ring on hover
+          if (isHov) {
+            ctx.beginPath();
+            ctx.arc(dp.x, dp.y, 11, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(34,211,238,0.18)";
+            ctx.fill();
+          }
+
+          // Dot
+          ctx.beginPath();
+          ctx.arc(dp.x, dp.y, isHov ? 6 : 4, 0, Math.PI * 2);
+          ctx.fillStyle = isHov ? "#22d3ee" : "rgba(34,211,238,0.85)";
+          ctx.fill();
+
+          // Label
+          var lp = pt(i, R + 30);
+          ctx.font = (isHov ? "600 " : "") + "13px 'Outfit',sans-serif";
+          var tx = lp.x, ty = lp.y;
+          ctx.textAlign   = tx < cx - 6 ? "right" : tx > cx + 6 ? "left" : "center";
+          ctx.textBaseline = ty < cy - 6 ? "bottom" : ty > cy + 6 ? "top" : "middle";
+          ctx.fillStyle = isHov ? "#22d3ee" : "#94a3b8";
+          ctx.fillText(data[i].name, tx, ty);
+        }
+      }
+
+      function tick() {
+        prog += 0.025;
+        if (prog >= 1) { prog = 1; animating = false; }
+        draw(prog);
+        if (animating) requestAnimationFrame(tick);
+      }
+
+      draw(0);
+
+      var started = false;
+      var startObs = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting && !started) {
+          started = true;
+          animating = true;
+          requestAnimationFrame(tick);
+          startObs.disconnect();
+        }
+      }, { threshold: 0.3 });
+      startObs.observe(canvas);
+
+      // Tooltip
+      var tip = document.getElementById("radarTooltip");
+
+      canvas.addEventListener("mousemove", function (e) {
+        var rect = canvas.getBoundingClientRect();
+        var sx = SIZE / rect.width;
+        var mx = (e.clientX - rect.left) * sx;
+        var my = (e.clientY - rect.top) * sx;
+        var found = -1;
+        for (var i = 0; i < N; i++) {
+          var dp = pt(i, R * (data[i].score / 100) * prog);
+          if (Math.hypot(mx - dp.x, my - dp.y) < 18) { found = i; break; }
+        }
+        if (found !== hover) {
+          hover = found;
+          canvas.style.cursor = found >= 0 ? "pointer" : "default";
+          draw(prog);
+        }
+        if (tip) {
+          if (found >= 0) {
+            tip.innerHTML =
+              "<div class='radar-tooltip-name'>" + data[found].name + "</div>" +
+              "<div class='radar-tooltip-score'>" + data[found].score + " / 100</div>" +
+              "<div class='radar-tooltip-desc'>" + data[found].desc + "</div>";
+            tip.style.left = (e.clientX + 14) + "px";
+            tip.style.top  = (e.clientY - 12) + "px";
+            tip.classList.add("show");
+          } else {
+            tip.classList.remove("show");
+          }
+        }
+      });
+
+      canvas.addEventListener("mouseleave", function () {
+        hover = -1;
+        draw(prog);
+        if (tip) tip.classList.remove("show");
+      });
+    })();
   </script>
 </body>
 </html>
