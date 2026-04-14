@@ -682,6 +682,82 @@
       font-size: 0.6875rem;
     }
 
+    /* Direction section */
+    .direction-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .direction-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .direction-card {
+      padding: 28px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.4);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s var(--ease), transform 0.25s var(--ease);
+    }
+
+    .direction-card:hover { transform: translateY(-2px); }
+
+    .direction-card.near  { border-color: rgba(34, 211, 238, 0.22); }
+    .direction-card.future { border-color: rgba(167, 139, 250, 0.2); }
+
+    .direction-card.near::before,
+    .direction-card.future::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .direction-card.near::before   { background: linear-gradient(90deg, var(--cyan), transparent); }
+    .direction-card.future::before { background: linear-gradient(90deg, var(--violet), transparent); }
+
+    .direction-phase {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .direction-card.near   .direction-phase { color: var(--cyan); }
+    .direction-card.future .direction-phase { color: var(--violet); }
+
+    .direction-card h3 {
+      margin: 0 0 12px;
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .direction-card p {
+      margin: 0 0 18px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .direction-roles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .direction-roles span {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .direction-card.near   .direction-roles span { border-color: rgba(34,211,238,0.25); color: var(--cyan); background: rgba(34,211,238,0.05); }
+    .direction-card.future .direction-roles span { border-color: rgba(167,139,250,0.25); color: var(--violet); background: rgba(167,139,250,0.05); }
+
     /* Radar chart */
     .radar-wrap {
       display: flex;
@@ -809,8 +885,9 @@
       <nav aria-label="主导航">
         <ul>
           <li><a href="#about">关于</a></li>
-          <li><a href="#experience">经历</a></li>
+          <li><a href="#direction">目标方向</a></li>
           <li><a href="#projects">项目</a></li>
+          <li><a href="#experience">经历</a></li>
           <li><a href="#skills">技能</a></li>
           <li><a href="#contact">联系</a></li>
         </ul>
@@ -828,7 +905,7 @@
         </p>
         <div class="hero-cta">
           <a class="btn btn-primary" href="#contact">取得联系</a>
-          <a class="btn btn-ghost" href="#experience">查看经历</a>
+          <a class="btn btn-ghost" href="#projects">查看项目</a>
         </div>
       </div>
       <div class="hero-card reveal">
@@ -882,40 +959,33 @@
       </div>
     </section>
 
-    <section id="experience">
+    <section id="direction">
       <div class="section-head reveal">
-        <p class="section-kicker">02 · EXPERIENCE</p>
-        <h2 class="section-title">从业经历</h2>
-        <p class="section-desc">
-          两段主线：上市互联网公司的数字营销数据化，以及大型零售 O2O 的搜索策略与体验。以下为高度概括的职务重心，代表性项目见下一节。
-        </p>
+        <p class="section-kicker">02 · DIRECTION</p>
+        <h2 class="section-title">目标方向</h2>
+        <p class="section-desc">明确求职意向与成长路径，供快速判断岗位匹配度。</p>
       </div>
-      <div class="timeline reveal">
-        <div class="timeline-item">
-          <div class="timeline-meta">2024.11 — 至今 · 沃尔玛（中国）· 深圳</div>
-          <h3>搜索运营 · O2O 电商</h3>
-          <ul class="timeline-list">
-            <li>建立三级搜索相关性评价标准，引入 LLM 构建规模化评测闭环，推动从人力抽检升级为算法自检</li>
-            <li>策略全量后<strong>加购率与 UV 价值</strong>在实验窗口内取得正向提升</li>
-            <li>联合算法与类目重构场景词标签与召回排序，缓解模糊意图下的供需错配</li>
-            <li>从 0 搭建搜索全链路监控与异动归因体系，上线结果页动态导航</li>
-            <li>搜索数据反哺采购与营运，<strong>显著压低线上缺货率</strong></li>
-          </ul>
+      <div class="direction-grid reveal">
+        <div class="direction-card near">
+          <div class="direction-phase">// 近期目标</div>
+          <h3>搜索 · 推荐 · 策略运营</h3>
+          <p>持续深耕搜索与推荐系统的策略与运营，在 LLM 评测、意图理解、供需匹配方向进一步积累，做真正懂算法也懂业务的复合型运营。</p>
+          <div class="direction-roles">
+            <span>搜索运营</span>
+            <span>推荐策略</span>
+            <span>增长运营</span>
+            <span>数据运营</span>
+          </div>
         </div>
-        <div class="timeline-item">
-          <div class="timeline-meta">2021.07 — 2024.11 · 杭州兑吧网络科技（上市）· 杭州</div>
-          <h3>数据分析 · 数字营销</h3>
-          <ul class="timeline-list">
-            <li>主导一物一码全链路体系，服务头部乳企活动周期内 <strong>DAU 翻倍</strong>，沉淀<strong>十万级</strong>可运营私域用户</li>
-            <li>SQL + BI 构建数据中台与通用看板，业务响应压缩至<strong>小时级</strong></li>
-            <li>RFM + 聚类用户分层，精细化权益策略带动目标客群<strong>复购率双位数提升</strong></li>
-            <li>建立营销 ROI 与异动根因分析框架，支撑可迭代预算决策</li>
-          </ul>
-        </div>
-        <div class="timeline-item">
-          <div class="timeline-meta">2017 — 2021 · 宁波财经学院</div>
-          <h3>计算机科学与技术 · 本科</h3>
-          <p>工科训练为后续数据、产品与算法协作打下基础；毕业至今持续在「互联网一线交付 + 行业观察」双线并行。</p>
+        <div class="direction-card future">
+          <div class="direction-phase">// 中长期方向</div>
+          <h3>AI Native 产品</h3>
+          <p>以搜索运营 + 数据分析背景为跳板，向 AI 原生产品方向转型，切入搜索 / 推荐产品策略或 AI 产品经理赛道，参与定义下一代智能交互产品形态。</p>
+          <div class="direction-roles">
+            <span>AI 产品经理</span>
+            <span>搜索产品经理</span>
+            <span>智能策略产品</span>
+          </div>
         </div>
       </div>
     </section>
@@ -950,9 +1020,34 @@
       </div>
     </section>
 
+    <section id="experience">
+      <div class="section-head reveal">
+        <p class="section-kicker">04 · EXPERIENCE</p>
+        <h2 class="section-title">从业经历</h2>
+        <p class="section-desc">两段核心履历，代表性项目与成果详见上方。</p>
+      </div>
+      <div class="timeline reveal">
+        <div class="timeline-item">
+          <div class="timeline-meta">2024.11 — 至今 · 沃尔玛（中国）· 深圳</div>
+          <h3>搜索运营 · O2O 电商</h3>
+          <p>主导搜索相关性治理与 LLM 评测闭环，负责搜索全链路策略优化、监控体系建设与跨团队算法协同。</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-meta">2021.07 — 2024.11 · 杭州兑吧网络科技（上市）· 杭州</div>
+          <h3>数据分析 · 数字营销</h3>
+          <p>负责零售品牌数字营销数据化，主导一物一码私域增长体系与数据中台建设，驱动用户精细化运营。</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-meta">2017 — 2021 · 宁波财经学院</div>
+          <h3>计算机科学与技术 · 本科</h3>
+          <p>工科训练为后续数据、产品与算法协作打下基础。</p>
+        </div>
+      </div>
+    </section>
+
     <section id="skills">
       <div class="section-head reveal">
-        <p class="section-kicker">04 · SKILLS</p>
+        <p class="section-kicker">05 · SKILLS</p>
         <h2 class="section-title">技能与工具</h2>
         <p class="section-desc">围绕搜索策略、数据与跨团队协作的实际栈，持续按业务需要扩展。</p>
       </div>
@@ -981,7 +1076,7 @@
 
     <section id="contact">
       <div class="section-head reveal">
-        <p class="section-kicker">05 · CONTACT</p>
+        <p class="section-kicker">06 · CONTACT</p>
         <h2 class="section-title">联系</h2>
       </div>
       <div class="contact-box reveal">
