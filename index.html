@@ -858,6 +858,59 @@
       font-weight: 600;
     }
 
+    /* ── Mobile ─────────────────────────────── */
+    @media (max-width: 640px) {
+
+      /* Nav: logo 上方，链接换行 */
+      header { padding: 12px 0; }
+      .nav-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 20px 14px;
+      }
+      nav ul { gap: 6px 12px; }
+      nav a  { font-size: 0.8rem; }
+
+      /* Wrap */
+      .wrap { padding: 0 16px 64px; }
+
+      /* Hero */
+      .hero { padding: 40px 0 48px; gap: 28px; }
+      .hero-lead { font-size: 0.9375rem; }
+      .hero-card { padding: 20px; }
+      .hero-card-footer { font-size: 0.75rem; line-height: 1.8; }
+      .stat-num { font-size: 1.25rem; }
+
+      /* Sections */
+      section { padding: 44px 0; }
+      .section-head { margin-bottom: 28px; }
+
+      /* Direction cards */
+      .direction-card { padding: 20px; }
+
+      /* Timeline */
+      .timeline { padding-left: 22px; }
+      .timeline-meta { white-space: normal; line-height: 1.6; }
+      .timeline-item::before { left: -19px; }
+
+      /* Radar: 居中 + 限制最大宽度 */
+      .radar-wrap { align-items: center; }
+      .radar-canvas-box {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      /* Contact */
+      .contact-box { padding: 24px 16px; }
+      .contact-email { font-size: 0.875rem; word-break: break-all; }
+    }
+
+    @media (max-width: 400px) {
+      .radar-canvas-box { max-width: 260px; }
+      .stat-row { gap: 10px; }
+    }
+
     /* Reveal */
     .reveal {
       opacity: 0;
