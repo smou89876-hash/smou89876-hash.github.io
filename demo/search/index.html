@@ -1138,18 +1138,10 @@
           <div class="filter-item">
             <span class="filter-label">关键词</span>
             <div class="kw-search-wrap">
-              <input type="text" id="kw_search" list="kw_termList" placeholder="输入关键词检索" autocomplete="off" />
+              <input type="text" id="kw_search" list="kw_termList" placeholder="ALL 或输入关键词" value="ALL" autocomplete="off" />
               <datalist id="kw_termList"></datalist>
               <button type="button" class="btn btn-primary" id="kw_searchBtn">检索</button>
-              <button type="button" class="btn" id="kw_clearBtn">清空</button>
-            </div>
-          </div>
-          <div class="filter-item">
-            <span class="filter-label">对比日期</span>
-            <div class="date-range-input visible" id="kw_dateWrap">
-              <input type="date" id="kw_dateStart" value="2026-05-20" />
-              <span>至</span>
-              <input type="date" id="kw_dateEnd" value="2026-05-26" />
+              <button type="button" class="btn" id="kw_clearBtn">重置</button>
             </div>
           </div>
           <div class="filter-item">
@@ -1195,7 +1187,12 @@
           <div class="panel-header flex-between">
             <div>
               <h3 id="kw_trendTitle">指标趋势</h3>
-              <div class="desc" id="kw_trendDesc">选择关键词后查看对比周期内走势</div>
+              <div class="desc" id="kw_trendDesc"></div>
+            </div>
+            <div class="granularity-tabs" id="kw_granularity">
+              <div class="granularity-tab active" data-g="day">日</div>
+              <div class="granularity-tab" data-g="week">自然周</div>
+              <div class="granularity-tab" data-g="month">月</div>
             </div>
           </div>
           <div class="metric-chips" id="kw_metricChips"></div>
@@ -2303,14 +2300,20 @@
 
     var kwState = {
       subTab: 'keyword',
-      keyword: '',
+      keyword: 'ALL',
       trendMetric: 'searchCount',
       minSearch: 50,
       productList: 'all',
       dateStart: '2026-05-20',
       dateEnd: '2026-05-26',
+      granularity: 'day',
       dynMetrics: []
     };
+
+    function kwIsAll() {
+      var q = (kwState.keyword || '').trim();
+      return q === '' || q.toUpperCase() === 'ALL';
+    }
 
     var kwChartGeometry = null;
 
@@ -2326,14 +2329,15 @@
 
     function kwSyncDatesFromTm() {
       var map = { yesterday: ['2026-05-25','2026-05-25'], '7d': ['2026-05-20','2026-05-26'], '30d': ['2026-04-27','2026-05-26'] };
-      var r = map[tmState.dateRange] || null;
-      if (r) {
-        kwState.dateStart = r[0]; kwState.dateEnd = r[1];
-        var s = document.getElementById('kw_dateStart');
-        var e = document.getElementById('kw_dateEnd');
-        if (s) s.value = r[0];
-        if (e) e.value = r[1];
+      var r;
+      if (tmState.dateRange === 'custom') {
+        var ts = document.getElementById('tm_dateStart');
+        var te = document.getElementById('tm_dateEnd');
+        if (ts && te && ts.value && te.value) r = [ts.value, te.value];
+      } else {
+        r = map[tmState.dateRange] || null;
       }
+      if (r) { kwState.dateStart = r[0]; kwState.dateEnd = r[1]; }
     }
 
     function kwParseDate(str) {
@@ -2419,12 +2423,14 @@
       if (!el) return;
       var range = kwState.dateStart+' ~ '+kwState.dateEnd;
       var dates = kwDateList();
-      if (kwState.keyword) {
-        el.innerHTML = '已检索关键词 <strong>'+kwState.keyword+'</strong> · 对比周期 '+range+' · 共 '+dates.length+' 天 · '+count+' 条记录';
-      } else if (kwState.subTab === 'product') {
-        el.innerHTML = 'TOP30 商品表现需先<strong>检索关键词</strong> · 对比周期 '+range;
+      if (kwIsAll()) {
+        if (kwState.subTab === 'product') {
+          el.innerHTML = 'TOP30 商品表现需先<strong>检索具体关键词</strong> · 对比周期 '+range;
+        } else {
+          el.innerHTML = '<strong>ALL</strong> 全量关键词快照（末日 Top 词）· 对比周期 '+range+' · 搜索次数 ≥ '+kwState.minSearch+' · 共 '+count+' 条';
+        }
       } else {
-        el.innerHTML = '全量关键词快照（末日 Top 词）· 对比周期 '+range+' · 搜索次数 ≥ '+kwState.minSearch+' · 共 '+count+' 条';
+        el.innerHTML = '已检索关键词 <strong>'+kwState.keyword+'</strong> · 对比周期 '+range+' · 共 '+dates.length+' 天 · '+count+' 条记录';
       }
     }
 
@@ -2450,7 +2456,7 @@
     function kwBuildKeywordTableRows() {
       var dates = kwDateList();
       var listLabel = kwProductListLabel(kwState.productList);
-      var rows = [], query = (kwState.keyword || '').trim();
+      var rows = [], query = kwIsAll() ? '' : (kwState.keyword || '').trim();
       if (query) {
         var matched = TERM_NAMES.filter(function (t) { return kwMatchKeyword(t, query); });
         if (matched.length === 0) matched = [query];
@@ -2474,8 +2480,8 @@
     }
 
     function kwBuildProductTableRows() {
+      if (kwIsAll()) return [];
       var query = (kwState.keyword || '').trim();
-      if (!query) return [];
       var dates = kwDateList();
       var listLabel = kwProductListLabel(kwState.productList);
       var matched = TERM_NAMES.filter(function (t) { return kwMatchKeyword(t, query); });
@@ -2567,52 +2573,95 @@
       kwRenderHint(rows.length);
     }
 
+    // ====== 趋势：日/周/月 ======
+    var KW_SUM_KEYS = { searchCount:1, searchUV:1, gmv:1, impCount:1 };
+
+    function kwBucketLabels() {
+      var g = kwState.granularity;
+      if (g === 'week')  return ['W18','W19','W20','W21','W22','W23','W24','W25'];
+      if (g === 'month') return ['12月','1月','2月','3月','4月','5月'];
+      return kwDateList().map(function (d) { return d.slice(5); });
+    }
+
+    // 把"日"为单位的生成器在 week/month 维度做等效放大；不同 bucket 间引入随机扰动
+    function kwBucketScale() {
+      var g = kwState.granularity;
+      if (g === 'week') return 7;
+      if (g === 'month') return 30;
+      return 1;
+    }
+
+    function kwSampleAt(term, bucketIdx, anchorDate) {
+      // 复用 kwGenKeywordMetrics 的口径，再叠加 bucket 维度的扰动
+      var base = kwGenKeywordMetrics(term, anchorDate);
+      var seed = hashStr(term + kwState.granularity + bucketIdx + kwState.productList);
+      var noise = 0.86 + rand(seed) * 0.28;
+      var trend = 1 + Math.sin((bucketIdx + (seed % 7)) * 0.8) * 0.08;
+      var scale = kwBucketScale();
+      var out = {};
+      Object.keys(base).forEach(function (k) {
+        if (KW_SUM_KEYS[k]) out[k] = base[k] * scale * noise * trend;
+        else out[k] = base[k] * (0.92 + rand(seed + 1) * 0.16);
+      });
+      return out;
+    }
+
     function kwTrendSeries(term) {
-      var dates = kwDateList();
+      var labels = kwBucketLabels();
       var metrics = kwGetActiveMetrics();
+      var anchor = kwState.dateEnd;
       var series = {};
-      metrics.forEach(function (m) { series[m.key] = dates.map(function (d) { return kwGenKeywordMetrics(term, d)[m.key]; }); });
-      return { labels: dates.map(function (d) { return d.slice(5); }), series: series };
+      metrics.forEach(function (m) {
+        series[m.key] = labels.map(function (_, i) { return kwSampleAt(term, i, anchor)[m.key]; });
+      });
+      return { labels: labels, series: series };
     }
 
     function kwAllTrendSeries() {
       // ALL = 全量关键词聚合：计数类求和，比率类按搜索次数加权
-      var dates = kwDateList();
+      var labels = kwBucketLabels();
       var metrics = kwGetActiveMetrics();
-      var SUM_KEYS = { searchCount:1, searchUV:1, gmv:1 };
+      var anchor = kwState.dateEnd;
       var series = {};
       metrics.forEach(function (m) { series[m.key] = []; });
-      dates.forEach(function (d) {
+      labels.forEach(function (_, i) {
         var totalSC = 0, agg = {};
         metrics.forEach(function (m) { agg[m.key] = 0; });
         TERM_NAMES.forEach(function (t) {
-          var v = kwGenKeywordMetrics(t, d);
+          var v = kwSampleAt(t, i, anchor);
           totalSC += v.searchCount;
           metrics.forEach(function (m) {
-            if (SUM_KEYS[m.key]) agg[m.key] += v[m.key];
-            else agg[m.key] += v[m.key] * v.searchCount; // 加权求和
+            if (KW_SUM_KEYS[m.key]) agg[m.key] += v[m.key];
+            else agg[m.key] += v[m.key] * v.searchCount;
           });
         });
         metrics.forEach(function (m) {
-          if (SUM_KEYS[m.key]) series[m.key].push(agg[m.key]);
+          if (KW_SUM_KEYS[m.key]) series[m.key].push(agg[m.key]);
           else series[m.key].push(totalSC > 0 ? agg[m.key] / totalSC : 0);
         });
       });
-      return { labels: dates.map(function (d) { return d.slice(5); }), series: series };
+      return { labels: labels, series: series };
     }
 
     function kwProductTrendSeries(term) {
-      var dates = kwDateList();
+      var labels = kwBucketLabels();
       var metrics = kwGetActiveMetrics();
+      var anchor = kwState.dateEnd;
+      var scale = kwBucketScale();
       var series = {};
       metrics.forEach(function (m) {
-        series[m.key] = dates.map(function (d) {
+        series[m.key] = labels.map(function (_, i) {
           var sum = 0, n = 10;
-          for (var i = 0; i < n; i++) sum += (kwGenProductMetrics(term, KW_PRODUCT_POOL[i], d, i)[m.key] || 0);
-          return sum / n;
+          for (var j = 0; j < n; j++) {
+            var base = kwGenProductMetrics(term, KW_PRODUCT_POOL[j], anchor, j)[m.key] || 0;
+            var seed = hashStr(term + KW_PRODUCT_POOL[j] + kwState.granularity + i);
+            var v = KW_SUM_KEYS[m.key] ? base * scale * (0.86 + rand(seed) * 0.28) : base * (0.92 + rand(seed) * 0.16);
+            sum += v;
+          }
+          return KW_SUM_KEYS[m.key] ? sum : sum / n;
         });
       });
-      return { labels: dates.map(function (d) { return d.slice(5); }), series: series };
+      return { labels: labels, series: series };
     }
 
     function kwDrawTrend() {
@@ -2622,10 +2671,10 @@
       var descEl  = document.getElementById('kw_trendDesc');
       if (!canvas || !wrap) return;
 
+      var isAll = kwIsAll();
       var query = (kwState.keyword || '').trim();
       var term = query;
-      var isAll = !query;
-      if (query) {
+      if (!isAll) {
         var matched = TERM_NAMES.filter(function (t) { return kwMatchKeyword(t, query); });
         term = matched.length ? matched[0] : query;
       }
@@ -2656,9 +2705,10 @@
       var mDef = metrics.filter(function (m) { return m.key === kwState.trendMetric; })[0] || metrics[0];
       var arr  = trendData.series[mDef.key];
 
-      if (titleEl) titleEl.textContent = (isAll ? '全量关键词（ALL）' : '「'+term+'」') + mDef.name + '趋势';
-      if (descEl)  descEl.textContent  = kwState.dateStart+' ~ '+kwState.dateEnd +
-        (isAll ? ' · 全量聚合（计数求和 / 比率按搜索次数加权）' : (kwState.subTab==='product' ? ' · TOP30商品均值' : ''));
+      var titleTerm = isAll ? 'ALL' : term;
+      if (titleEl) titleEl.textContent = titleTerm + ' · ' + mDef.name;
+      if (descEl)  descEl.textContent  = kwState.dateStart + ' ~ ' + kwState.dateEnd +
+        (kwState.subTab === 'product' ? ' · TOP30 商品均值' : '');
 
       var pad = { top: 20, right: 20, bottom: 36, left: 62 };
       var cW = w-pad.left-pad.right, cH = h-pad.top-pad.bottom;
@@ -2764,14 +2814,12 @@
 
       document.getElementById('kw_searchBtn').addEventListener('click', applySearch);
       document.getElementById('kw_clearBtn').addEventListener('click', function () {
-        kwState.keyword = '';
+        kwState.keyword = 'ALL';
         var input = document.getElementById('kw_search');
-        if (input) input.value = '';
+        if (input) input.value = 'ALL';
         kwRefreshAll();
       });
       document.getElementById('kw_apply').addEventListener('click', function () {
-        kwState.dateStart = document.getElementById('kw_dateStart').value || kwState.dateStart;
-        kwState.dateEnd   = document.getElementById('kw_dateEnd').value   || kwState.dateEnd;
         kwState.minSearch = parseInt(document.getElementById('kw_minSearch').value, 10) || 0;
         kwState.productList = document.getElementById('kw_productList').value;
         applySearch();
@@ -2786,6 +2834,15 @@
           kwState.subTab = tab.getAttribute('data-kwtab');
           kwState.trendMetric = kwGetActiveMetrics()[0].key;
           kwRefreshAll();
+        });
+      });
+
+      document.querySelectorAll('#kw_granularity .granularity-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('#kw_granularity .granularity-tab').forEach(function (t) { t.classList.remove('active'); });
+          tab.classList.add('active');
+          kwState.granularity = tab.getAttribute('data-g');
+          kwDrawTrend();
         });
       });
 
