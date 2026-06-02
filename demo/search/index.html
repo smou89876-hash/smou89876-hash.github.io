@@ -862,7 +862,8 @@
     <!-- Tab 导航 -->
     <div class="tab-nav">
       <div class="tab-nav-item active" data-tab="1">Part 1 · 数据总览</div>
-      <div class="tab-nav-item" data-tab="2">Part 2 · 搜索词表现</div>
+      <div class="tab-nav-item" data-tab="2">Part 2 · 关键词分析</div>
+      <div class="tab-nav-item" data-tab="3">Part 3 · 搜索缺货</div>
     </div>
 
     <!-- ====================================================== -->
@@ -874,11 +875,12 @@
       <div class="filter-card">
         <div class="filter-row">
           <div class="filter-item">
-            <span class="filter-label">日期</span>
+            <span class="filter-label">日期类型</span>
             <select class="select" id="filterDate">
-              <option value="yesterday">昨日</option>
-              <option value="7d" selected>近7天</option>
-              <option value="30d">近30天</option>
+              <option value="yesterday">昨天</option>
+              <option value="wtd" selected>WTD</option>
+              <option value="mtd">MTD</option>
+              <option value="ytd">YTD</option>
               <option value="custom">自定义</option>
             </select>
             <div class="date-range-input" id="customDate">
@@ -888,26 +890,31 @@
             </div>
           </div>
           <div class="filter-item">
-            <span class="filter-label">平台业态</span>
+            <span class="filter-label">平台</span>
+            <select class="select" id="filterApp">
+              <option value="all">ALL</option>
+              <option value="wmapp">WMAPP</option>
+              <option value="wmdj">WMDJ</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">业态</span>
             <select class="select" id="filterPlatform">
-              <option value="all">全部业态</option>
-              <option value="waimai">外卖</option>
-              <option value="shangou">闪购</option>
-              <option value="daodian">到店</option>
-              <option value="jiulv">酒旅</option>
+              <option value="all">ALL</option>
+              <option value="jsd">极速达</option>
+              <option value="zsd">准时达</option>
+              <option value="qcp">全城配</option>
+              <option value="qqg">全球购</option>
             </select>
           </div>
           <div class="filter-item">
             <span class="filter-label">大区</span>
             <select class="select" id="filterRegion">
-              <option value="all">全部大区</option>
-              <option value="hb">华北</option>
-              <option value="hd">华东</option>
-              <option value="hn">华南</option>
-              <option value="xn">西南</option>
-              <option value="xb">西北</option>
-              <option value="db">东北</option>
-              <option value="hz">华中</option>
+              <option value="all">ALL</option>
+              <option value="a">A</option>
+              <option value="b">B</option>
+              <option value="c">C</option>
+              <option value="d">D</option>
             </select>
           </div>
           <div class="filter-item">
@@ -920,9 +927,9 @@
           <div class="filter-item">
             <span class="filter-label">商品列表</span>
             <select class="select" id="filterCategory">
-              <option value="all">全部</option>
+              <option value="all">ALL</option>
               <option value="search_result">搜索结果页</option>
-              <option value="recommend">为你推荐</option>
+              <option value="recommend">为你推荐页</option>
             </select>
           </div>
           <div class="filter-actions">
@@ -935,50 +942,56 @@
       <!-- 核心指标卡 -->
       <div class="section-title">
         <h2>核心指标</h2>
-        <div class="hint">点击指标卡可在下方趋势图中查看</div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="seg-tabs" id="kpiCompareTabs" style="background:#f5f7fa">
+            <div class="seg-tab active" data-cmp="wow">上周环比</div>
+            <div class="seg-tab" data-cmp="yoy">去年同比</div>
+          </div>
+          <div class="hint">点击指标卡切换下方趋势图</div>
+        </div>
       </div>
       <div class="kpi-grid" id="kpiGrid"></div>
 
-      <!-- 漏斗 + 趋势 -->
-      <div class="content-grid">
-        <div class="panel" style="position:relative;">
-          <div class="panel-header">
-            <div>
-              <h3>搜索转化漏斗</h3>
-              <div class="desc">用户从搜索到支付的完整路径</div>
-            </div>
-            <div class="granularity-tabs" id="funnelView">
-              <div class="granularity-tab active" data-view="uv">UV</div>
-              <div class="granularity-tab" data-view="pv">PV</div>
-            </div>
+      <!-- 核心指标趋势 -->
+      <div class="section-title">
+        <h2>核心指标趋势</h2>
+        <div class="hint">最多同时对比 3 个指标，点击上方指标卡切换</div>
+      </div>
+      <div class="panel" style="position:relative;">
+        <div class="panel-header">
+          <div class="metric-chips" id="metricChips" style="margin:0"></div>
+          <div class="granularity-tabs" id="trendGranularity">
+            <div class="granularity-tab active" data-g="day">日</div>
+            <div class="granularity-tab" data-g="week">自然周</div>
+            <div class="granularity-tab" data-g="month">月</div>
           </div>
-          <div class="funnel" id="funnel"></div>
-          <div class="loading-overlay" id="funnelLoading"><div class="spinner"></div></div>
         </div>
+        <div class="chart-wrap" style="height:340px">
+          <canvas id="trendChart"></canvas>
+          <div class="chart-tooltip" id="chartTooltip"></div>
+        </div>
+        <div class="loading-overlay" id="trendLoading"><div class="spinner"></div></div>
+      </div>
 
-        <div class="panel" style="position:relative;">
-          <div class="panel-header">
-            <div>
-              <h3>指标趋势</h3>
-              <div class="desc">最多同时对比 3 个指标</div>
-            </div>
-            <div class="granularity-tabs" id="trendGranularity">
-              <div class="granularity-tab active" data-g="day">日</div>
-              <div class="granularity-tab" data-g="week">自然周</div>
-              <div class="granularity-tab" data-g="month">月</div>
-            </div>
+      <!-- 搜索转化漏斗 -->
+      <div class="section-title" style="margin-top:20px">
+        <h2>搜索转化漏斗</h2>
+        <div class="hint">用户从搜索到支付的完整路径，定位流失环节</div>
+      </div>
+      <div class="panel" style="position:relative;">
+        <div class="panel-header">
+          <div></div>
+          <div class="granularity-tabs" id="funnelView">
+            <div class="granularity-tab active" data-view="uv">UV</div>
+            <div class="granularity-tab" data-view="pv">PV</div>
           </div>
-          <div class="metric-chips" id="metricChips"></div>
-          <div class="chart-wrap">
-            <canvas id="trendChart"></canvas>
-            <div class="chart-tooltip" id="chartTooltip"></div>
-          </div>
-          <div class="loading-overlay" id="trendLoading"><div class="spinner"></div></div>
         </div>
+        <div class="funnel" id="funnel"></div>
+        <div class="loading-overlay" id="funnelLoading"><div class="spinner"></div></div>
       </div>
 
       <!-- 搜索流量报表（下钻分析） -->
-      <div class="section-title" style="margin-top:4px">
+      <div class="section-title" style="margin-top:20px">
         <h2>搜索流量报表</h2>
         <div class="hint">多维度下钻 · 切换维度查看流量结构</div>
       </div>
@@ -988,8 +1001,8 @@
             <span class="filter-label">分析维度</span>
             <div class="dim-group" id="trafficDimChips">
               <span class="dim-chip active" data-dim="searchType">搜索类型</span>
-              <span class="dim-chip" data-dim="customerType">新老客</span>
-              <span class="dim-chip" data-dim="channel">来源渠道</span>
+              <span class="dim-chip" data-dim="productList">商品列表</span>
+              <span class="dim-chip" data-dim="channel">用户来源渠道</span>
               <span class="dim-chip" data-dim="category">品类 ▾</span>
             </div>
           </div>
@@ -998,6 +1011,18 @@
               <span class="dim-sub-tab active" data-lvl="div">一级类目 (div)</span>
               <span class="dim-sub-tab" data-lvl="dept">二级类目 (dept)</span>
               <span class="dim-sub-tab" data-lvl="cate">三级类目 (cate)</span>
+            </div>
+          </div>
+          <div class="filter-item">
+            <div class="dyn-btn-wrap">
+              <button type="button" class="dyn-btn" id="traffic_dynBtn">动态指标 <span class="dyn-badge" id="traffic_dynBadge">0</span> ▾</button>
+              <div class="dyn-popover" id="traffic_dynPopover">
+                <div class="dyn-pop-title">追加指标</div>
+                <label class="dyn-pop-item"><input type="checkbox" value="searchPV" />搜索次数</label>
+                <label class="dyn-pop-item"><input type="checkbox" value="cartRate" />加购率</label>
+                <label class="dyn-pop-item"><input type="checkbox" value="clickRate" />点击率</label>
+                <label class="dyn-pop-item"><input type="checkbox" value="avgOrderValue" />客单价</label>
+              </div>
             </div>
           </div>
           <div class="filter-actions">
@@ -1027,11 +1052,12 @@
       <div class="filter-card">
         <div class="filter-row">
           <div class="filter-item">
-            <span class="filter-label">日期</span>
+            <span class="filter-label">日期类型</span>
             <select class="select" id="tm_filterDate">
-              <option value="yesterday">昨日</option>
-              <option value="7d" selected>近7天</option>
-              <option value="30d">近30天</option>
+              <option value="yesterday">昨天</option>
+              <option value="wtd" selected>WTD</option>
+              <option value="mtd">MTD</option>
+              <option value="ytd">YTD</option>
               <option value="custom">自定义</option>
             </select>
             <div class="date-range-input" id="tm_customDate">
@@ -1041,26 +1067,31 @@
             </div>
           </div>
           <div class="filter-item">
-            <span class="filter-label">平台业态</span>
+            <span class="filter-label">平台</span>
+            <select class="select" id="tm_filterApp">
+              <option value="all">ALL</option>
+              <option value="wmapp">WMAPP</option>
+              <option value="wmdj">WMDJ</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">业态</span>
             <select class="select" id="tm_filterPlatform">
-              <option value="all">全部业态</option>
-              <option value="waimai">外卖</option>
-              <option value="shangou">闪购</option>
-              <option value="daodian">到店</option>
-              <option value="jiulv">酒旅</option>
+              <option value="all">ALL</option>
+              <option value="jsd">极速达</option>
+              <option value="zsd">准时达</option>
+              <option value="qcp">全城配</option>
+              <option value="qqg">全球购</option>
             </select>
           </div>
           <div class="filter-item">
             <span class="filter-label">大区</span>
             <select class="select" id="tm_filterRegion">
-              <option value="all">全部大区</option>
-              <option value="hb">华北</option>
-              <option value="hd">华东</option>
-              <option value="hn">华南</option>
-              <option value="xn">西南</option>
-              <option value="xb">西北</option>
-              <option value="db">东北</option>
-              <option value="hz">华中</option>
+              <option value="all">ALL</option>
+              <option value="a">A</option>
+              <option value="b">B</option>
+              <option value="c">C</option>
+              <option value="d">D</option>
             </select>
           </div>
           <div class="filter-item">
@@ -1073,9 +1104,9 @@
           <div class="filter-item">
             <span class="filter-label">商品列表</span>
             <select class="select" id="tm_filterCategory">
-              <option value="all">全部</option>
+              <option value="all">ALL</option>
               <option value="search_result">搜索结果页</option>
-              <option value="recommend">为你推荐</option>
+              <option value="recommend">为你推荐页</option>
             </select>
           </div>
           <div class="filter-actions">
@@ -1088,7 +1119,7 @@
       <!-- TOP 80 搜索词热力图 -->
       <div class="section-title">
         <h2> &nbsp;TOP 80 搜索词 &nbsp;<span style="font-size:12px;font-weight:400;color:var(--muted)">热力图</span></h2>
-        <div class="hint">图块大小 = 搜索 UV &nbsp;·&nbsp; 颜色深浅 = 所选颜色指标</div>
+        <div class="hint">TOP 80 搜索词占大盘搜索量 <strong style="color:var(--text-sub)">28%</strong> · GMV占比 <strong style="color:var(--text-sub)">28%</strong> &nbsp;·&nbsp; 图块大小 = 搜索 UV &nbsp;·&nbsp; 颜色深浅 = 颜色指标（越深越差）</div>
       </div>
 
       <div class="panel" style="position:relative;">
@@ -1097,10 +1128,11 @@
             <div class="metric-selector">
               <span class="metric-selector-label">颜色指标</span>
               <div class="seg-tabs" id="tm_colorMetricTabs">
+                <div class="seg-tab" data-metric="cartRate">加购率</div>
                 <div class="seg-tab active" data-metric="payRate">支付率</div>
                 <div class="seg-tab" data-metric="uvValue">UV价值</div>
                 <div class="seg-tab" data-metric="noResultRate">无结果率</div>
-                <div class="seg-tab" data-metric="absentRate">商品缺勤率</div>
+                <div class="seg-tab" data-metric="absentRate">曝光缺货率</div>
               </div>
             </div>
           </div>
@@ -1124,7 +1156,11 @@
       <!-- 重点关注词 -->
       <div class="section-title" style="margin-top:4px">
         <h2> &nbsp;重点关注词</h2>
-        <div class="hint">支付率低于大盘均值 <span id="tm_avgLabel" style="color:var(--danger);font-weight:600">6.72%</span> 标红</div>
+        <div class="hint">
+          <span style="margin-right:14px">已完成周：<strong style="color:var(--text-sub)">WK17 (5/25–5/31)</strong></span>
+          <span style="margin-right:14px">未完成周：<strong style="color:var(--text-sub)">WK18 (6/1–6/3)</strong></span>
+          <span>加购率低于大盘均值 <span id="tm_avgLabel" style="color:var(--danger);font-weight:600">18.50%</span> 标红</span>
+        </div>
       </div>
       <div class="focus-grid" id="tm_focusGrid"></div>
 
@@ -1138,41 +1174,51 @@
           <div class="filter-item">
             <span class="filter-label">关键词</span>
             <div class="kw-search-wrap">
-              <input type="text" id="kw_search" list="kw_termList" placeholder="ALL 或输入关键词" value="ALL" autocomplete="off" />
+              <input type="text" id="kw_search" list="kw_termList" placeholder="ALL 或输入关键词（多个用逗号分隔）" value="ALL" autocomplete="off" style="width:260px" />
               <datalist id="kw_termList"></datalist>
               <button type="button" class="btn btn-primary" id="kw_searchBtn">检索</button>
               <button type="button" class="btn" id="kw_clearBtn">重置</button>
             </div>
           </div>
           <div class="filter-item">
-            <span class="filter-label">搜索次数</span>
+            <span class="filter-label">对比日期</span>
+            <div class="date-range-input visible">
+              <input type="date" id="kw_dateStart" value="2026-05-20" />
+              <span>至</span>
+              <input type="date" id="kw_dateEnd" value="2026-05-26" />
+            </div>
+          </div>
+          <div class="filter-item" id="kw_minSearchWrap">
+            <span class="filter-label">搜索人数</span>
             <select class="select" id="kw_minOp" style="min-width:88px">
               <option value="gte" selected>大于等于</option>
             </select>
             <input type="number" class="kw-min-input" id="kw_minSearch" value="50" min="0" />
+          </div>
+          <div class="filter-item" id="kw_upcWrap" style="display:none">
+            <span class="filter-label">商品UPC</span>
+            <input type="text" id="kw_upc" placeholder="输入UPC检索" autocomplete="off" style="padding:5px 10px;border:1px solid var(--line-strong);border-radius:4px;font-size:13px;width:140px;font-family:inherit" />
           </div>
           <div class="filter-item">
             <span class="filter-label">商品列表</span>
             <select class="select" id="kw_productList">
               <option value="all" selected>ALL</option>
               <option value="search_result">搜索结果页</option>
-              <option value="recommend">为你推荐</option>
+              <option value="recommend">为你推荐页</option>
             </select>
           </div>
           <div class="filter-item">
             <div class="dyn-btn-wrap">
               <button type="button" class="dyn-btn" id="kw_dynBtn">动态指标 <span class="dyn-badge" id="kw_dynBadge">0</span> ▾</button>
               <div class="dyn-popover" id="kw_dynPopover">
-                <div class="dyn-pop-title">选择附加指标（关键词表）</div>
-                <label class="dyn-pop-item"><input type="checkbox" value="cartRate" />加购率</label>
-                <label class="dyn-pop-item"><input type="checkbox" value="uvValue" />UV价值</label>
-                <label class="dyn-pop-item"><input type="checkbox" value="noResultRate" />无结果率</label>
-                <label class="dyn-pop-item"><input type="checkbox" value="absentRate" />商品缺勤率</label>
+                <div class="dyn-pop-title" id="kw_dynPopTitle">选择附加指标</div>
+                <div id="kw_dynPopList"></div>
               </div>
             </div>
           </div>
           <div class="filter-actions">
             <button type="button" class="btn btn-primary" id="kw_apply">查询</button>
+            <button type="button" class="traffic-export" id="kw_export">⬇ 导出CSV</button>
           </div>
         </div>
 
@@ -1211,7 +1257,54 @@
         <div class="kw-table-footer" id="kw_tableFooter"></div>
       </div>
 
+      <!-- 3.4 关键词导航数据表现（保留现网） -->
+      <div class="section-title" style="margin-top:20px">
+        <h2>关键词导航数据表现</h2>
+        <div class="hint">保留现网 · 本期不重做</div>
+      </div>
+      <div class="panel" style="padding:40px 24px;text-align:center;color:var(--muted)">
+        <div style="font-size:32px;margin-bottom:12px">📊</div>
+        <div style="font-size:14px;color:var(--text-sub);font-weight:500;margin-bottom:6px">关键词导航数据表现</div>
+        <div style="font-size:12px">保留现网 V1.x 实现，跳转至现网链接查看</div>
+        <div style="margin-top:14px"><span class="btn" style="cursor:default">→ 跳转现网</span></div>
+      </div>
+
     </div><!-- /pane2 -->
+
+    <!-- ====================================================== -->
+    <!--  PART 3：搜索缺货                                       -->
+    <!-- ====================================================== -->
+    <div id="pane3" class="tab-pane">
+      <!-- 4.1 搜索缺货数据分析 -->
+      <div class="section-title">
+        <h2>搜索缺货数据分析</h2>
+        <div class="hint">T+1 离线数据 · 保留现网 · 本期不重做</div>
+      </div>
+      <div class="panel" style="padding:48px 24px;text-align:center;color:var(--muted)">
+        <div style="font-size:32px;margin-bottom:12px">📦</div>
+        <div style="font-size:15px;color:var(--text-sub);font-weight:500;margin-bottom:6px">搜索缺货数据分析</div>
+        <div style="font-size:12px;max-width:520px;margin:0 auto;line-height:1.7">
+          按品类/词包/商品维度统计搜索结果中"曝光后实际不可售"的占比，识别系统性供给缺口与商家治理优先级。<br/>
+          <span style="color:var(--text)">保留现网 V1.x 实现</span>，本期不重做。
+        </div>
+        <div style="margin-top:18px"><span class="btn" style="cursor:default">→ 跳转现网</span></div>
+      </div>
+
+      <!-- 4.2 实时搜索缺货 -->
+      <div class="section-title" style="margin-top:20px">
+        <h2>实时搜索缺货</h2>
+        <div class="hint">实时数据 · 保留现网 · 本期不重做</div>
+      </div>
+      <div class="panel" style="padding:48px 24px;text-align:center;color:var(--muted)">
+        <div style="font-size:32px;margin-bottom:12px">⚡</div>
+        <div style="font-size:15px;color:var(--text-sub);font-weight:500;margin-bottom:6px">实时搜索缺货</div>
+        <div style="font-size:12px;max-width:520px;margin:0 auto;line-height:1.7">
+          分钟级实时刷新搜索缺货关键词与商品，供值班/应急运营快速干预（紧急补给、词包屏蔽、商家催单等）。<br/>
+          <span style="color:var(--text)">保留现网 V1.x 实现</span>，本期不重做。
+        </div>
+        <div style="margin-top:18px"><span class="btn" style="cursor:default">→ 跳转现网</span></div>
+      </div>
+    </div><!-- /pane3 -->
 
   </div><!-- /container -->
 
@@ -1257,16 +1350,16 @@
     var METRICS = [
       { key: 'searchUV',     name: '搜索 UV',    unit: '万', color: '#1677ff', format: 'wan',  baseline: 124.8, good: 'up'   },
       { key: 'payRate',      name: '支付率',     unit: '%',  color: '#722ed1', format: 'pct',  baseline: 6.72,  good: 'up'   },
-      { key: 'gmvShare',     name: 'GMV 占比',   unit: '%',  color: '#13c2c2', format: 'pct',  baseline: 28.4,  good: 'up'   },
       { key: 'uvValue',      name: 'UV 价值',    unit: '元', color: '#fa8c16', format: 'yuan', baseline: 2.67,  good: 'up'   },
-      { key: 'absentRate',   name: '商品缺勤率', unit: '%',  color: '#ff4d4f', format: 'pct',  baseline: 3.21,  good: 'down' },
+      { key: 'gmvShare',     name: '销售贡献',   unit: '%',  color: '#13c2c2', format: 'pct',  baseline: 28.4,  good: 'up'   },
+      { key: 'absentRate',   name: '曝光缺货率', unit: '%',  color: '#ff4d4f', format: 'pct',  baseline: 3.21,  good: 'down' },
       { key: 'noResultRate', name: '无结果率',   unit: '%',  color: '#faad14', format: 'pct',  baseline: 1.84,  good: 'down' }
     ];
 
     var state = {
-      dateRange: '7d', customStart: '2026-05-20', customEnd: '2026-05-26',
-      platform: 'all', region: 'all', granularity: 'daily_avg', category: 'all',
-      trendGranularity: 'day', funnelView: 'uv',
+      dateRange: 'wtd', customStart: '2026-05-20', customEnd: '2026-05-26',
+      app: 'all', platform: 'all', region: 'all', granularity: 'daily_avg', category: 'all',
+      trendGranularity: 'day', funnelView: 'uv', compareMode: 'wow',
       activeMetrics: ['searchUV', 'payRate', 'uvValue']
     };
 
@@ -1277,15 +1370,20 @@
 
     function computeKPIs() {
       var coef = filterCoef();
-      var dateMult = state.dateRange === 'yesterday' ? 0.14 : state.dateRange === '30d' ? 4.2 : 1.0;
+      var dateMult = state.dateRange === 'yesterday' ? 0.14
+                   : state.dateRange === 'mtd' ? 4.6
+                   : state.dateRange === 'ytd' ? 22
+                   : 1.0;
       var result = {};
       METRICS.forEach(function (m) {
         var seed = hashStr(state.dateRange + state.platform + state.region + state.category + m.key);
         var noise = 0.92 + rand(seed) * 0.16;
         var val = m.format === 'wan' ? m.baseline * dateMult * coef * noise : m.baseline * coef * noise;
-        var prevSeed = hashStr('prev' + state.dateRange + state.platform + state.region + m.key);
+        var prevSeed = hashStr('prev' + state.compareMode + state.dateRange + state.platform + state.region + m.key);
         var prevNoise = 0.85 + rand(prevSeed) * 0.3;
-        var prev = m.format === 'wan' ? m.baseline * dateMult * coef * prevNoise * 0.95 : m.baseline * coef * prevNoise * 0.97;
+        // YoY 偏离更大
+        var prevFactor = state.compareMode === 'yoy' ? (0.7 + rand(prevSeed + 9) * 0.45) : (0.94 + rand(prevSeed + 9) * 0.1);
+        var prev = m.format === 'wan' ? m.baseline * dateMult * coef * prevNoise * prevFactor : m.baseline * coef * prevNoise * prevFactor;
         result[m.key] = { value: val, prev: prev, change: ((val - prev) / prev) * 100 };
       });
       return result;
@@ -1293,7 +1391,10 @@
 
     function computeFunnel() {
       var coef = filterCoef();
-      var dateMult = state.dateRange === 'yesterday' ? 0.14 : state.dateRange === '30d' ? 4.2 : 1.0;
+      var dateMult = state.dateRange === 'yesterday' ? 0.14
+                   : state.dateRange === 'mtd' ? 4.6
+                   : state.dateRange === 'ytd' ? 22
+                   : 1.0;
       var pvMult = state.funnelView === 'pv' ? 1.85 : 1;
       var base = 124.8 * dateMult * coef * pvMult;
       var seed = hashStr('funnel' + state.platform + state.region + state.category);
@@ -1311,7 +1412,7 @@
       var g = state.trendGranularity;
       var points, labels = [];
       if (g === 'day') {
-        points = state.dateRange === '30d' ? 30 : 7;
+        points = state.dateRange === 'mtd' ? 30 : state.dateRange === 'ytd' ? 30 : 7;
         var endDate = new Date('2026-05-26');
         for (var i = points - 1; i >= 0; i--) {
           var d = new Date(endDate); d.setDate(d.getDate() - i);
@@ -1368,7 +1469,7 @@
           '<div class="kpi-value">' + fmt(d.value, m.format) + '<span class="kpi-unit">' + m.unit + '</span></div>' +
           '<div class="kpi-compare">' +
             '<span class="kpi-change ' + cls + '"><span class="kpi-arrow">' + arrow + '</span>' + fmtChange(d.change) + '</span>' +
-            '<span style="color:var(--muted);font-size:11px">环比' + (state.dateRange === 'yesterday' ? '前日' : '上期') + '</span>' +
+            '<span style="color:var(--muted);font-size:11px">' + (state.compareMode === 'yoy' ? '去年同比' : '上周环比') + '</span>' +
           '</div>';
         card.addEventListener('click', function () { toggleMetric(m.key); });
         grid.appendChild(card);
@@ -1376,7 +1477,7 @@
     }
 
     function getMetricTip(key) {
-      var map = { searchUV:'统计周期内发起搜索行为的去重用户数', payRate:'搜索后产生支付的UV / 搜索UV', gmvShare:'搜索产生的GMV占大盘GMV的比例', uvValue:'搜索GMV / 搜索UV，单用户搜索价值', absentRate:'搜索词命中商品但实际不可购买的占比', noResultRate:'搜索结果为空的请求占比' };
+      var map = { searchUV:'统计周期内发起搜索行为的去重用户数', payRate:'搜索后产生支付的UV / 搜索UV', gmvShare:'搜索产生的GMV占大盘GMV的比例（销售贡献）', uvValue:'搜索GMV / 搜索UV，单用户搜索价值', absentRate:'搜索结果中曝光商品实际不可售（缺货/下架）的占比', noResultRate:'搜索结果为空的请求占比' };
       return map[key] || '';
     }
 
@@ -1537,17 +1638,18 @@
       });
       document.getElementById('dateStart').addEventListener('change', function (e) { state.customStart = e.target.value; });
       document.getElementById('dateEnd').addEventListener('change', function (e) { state.customEnd = e.target.value; });
+      document.getElementById('filterApp').addEventListener('change', function (e)        { state.app = e.target.value; });
       document.getElementById('filterPlatform').addEventListener('change', function (e)   { state.platform = e.target.value; });
       document.getElementById('filterRegion').addEventListener('change', function (e)     { state.region = e.target.value; });
       document.getElementById('filterGranularity').addEventListener('change', function (e){ state.granularity = e.target.value; });
       document.getElementById('filterCategory').addEventListener('change', function (e)   { state.category = e.target.value; });
 
       document.getElementById('btnReset').addEventListener('click', function () {
-        state.dateRange = '7d'; state.platform = 'all'; state.region = 'all';
+        state.dateRange = 'wtd'; state.app = 'all'; state.platform = 'all'; state.region = 'all';
         state.granularity = 'daily_avg'; state.category = 'all'; state.trendGranularity = 'day';
-        document.getElementById('filterDate').value = '7d';
+        document.getElementById('filterDate').value = 'wtd';
         document.getElementById('customDate').classList.remove('visible');
-        ['filterPlatform','filterRegion','filterCategory'].forEach(function (id) { document.getElementById(id).value = 'all'; });
+        ['filterApp','filterPlatform','filterRegion','filterCategory'].forEach(function (id) { document.getElementById(id).value = 'all'; });
         document.getElementById('filterGranularity').value = 'daily_avg';
         document.querySelectorAll('#trendGranularity .granularity-tab').forEach(function (t) { t.classList.toggle('active', t.getAttribute('data-g') === 'day'); });
         refreshAll(true);
@@ -1559,6 +1661,13 @@
           document.querySelectorAll('#trendGranularity .granularity-tab').forEach(function (t) { t.classList.remove('active'); });
           tab.classList.add('active'); state.trendGranularity = tab.getAttribute('data-g');
           showLoading('trendLoading', 240); setTimeout(drawTrend, 200);
+        });
+      });
+      document.querySelectorAll('#kpiCompareTabs .seg-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          document.querySelectorAll('#kpiCompareTabs .seg-tab').forEach(function (t) { t.classList.remove('active'); });
+          tab.classList.add('active'); state.compareMode = tab.getAttribute('data-cmp');
+          renderKPIs();
         });
       });
       document.querySelectorAll('#funnelView .granularity-tab').forEach(function (tab) {
@@ -1597,9 +1706,9 @@
     //  搜索流量报表（下钻明细）
     // ============================================================
     var TRAFFIC_DIMS = {
-      searchType:   { label: '搜索类型',   values: ['主动搜索','推荐搜索','历史搜索','热词推荐','语音搜索','扫一扫'] },
-      customerType: { label: '新老客',     values: ['新客','活跃老客','回流老客','沉睡老客'] },
-      channel:      { label: '来源渠道',   values: ['APP首页搜索框','首页搜索发现','分类页搜索','个人中心','Push通知','分享外链','小程序','H5'] },
+      searchType:  { label: '搜索类型',   values: ['主动搜索','推荐搜索','历史搜索','热词推荐','语音搜索','扫一扫'] },
+      productList: { label: '商品列表',   values: ['搜索结果页','为你推荐页'] },
+      channel:     { label: '用户来源渠道', values: ['APP首页搜索框','首页搜索发现','分类页搜索','个人中心','Push通知','分享外链','小程序','H5'] },
       category: {
         label: '品类',
         div:  ['餐饮','零售商超','到店服务','酒店旅游','医药'],
@@ -1608,23 +1717,39 @@
       }
     };
 
-    var TRAFFIC_METRICS = [
-      { key:'searchPV',   name:'搜索次数', format:'int',    align:'num' },
-      { key:'searchUV',   name:'搜索人数', format:'int',    align:'num' },
-      { key:'payRate',    name:'支付率',   format:'pct',    align:'num' },
-      { key:'uvValue',    name:'UV价值',   format:'yuan',   align:'num' },
-      { key:'gmv',        name:'GMV',      format:'money',  align:'num' },
-      { key:'absentRate', name:'商品缺勤率', format:'pct',  align:'num' },
-      { key:'noResultRate', name:'无结果率', format:'pct',  align:'num' }
+    var TRAFFIC_METRICS_FIXED = [
+      { key:'searchUV',     name:'搜索人数', format:'int',   align:'num' },
+      { key:'trafficShare', name:'流量占比', format:'pct',   align:'num', isShare: true },
+      { key:'payRate',      name:'支付率',   format:'pct',   align:'num' },
+      { key:'uvValue',      name:'UV价值',   format:'yuan',  align:'num' },
+      { key:'gmv',          name:'GMV',      format:'money', align:'num' },
+      { key:'absentRate',   name:'曝光缺货率', format:'pct', align:'num' },
+      { key:'noResultRate', name:'无结果率', format:'pct',   align:'num' }
+    ];
+    var TRAFFIC_METRICS_DYN = [
+      { key:'searchPV',     name:'搜索次数',   format:'int',  align:'num' },
+      { key:'cartRate',     name:'加购率',     format:'pct',  align:'num' },
+      { key:'clickRate',    name:'点击率',     format:'pct',  align:'num' },
+      { key:'avgOrderValue', name:'客单价',    format:'yuan', align:'num' }
     ];
 
     var trafficState = {
       dim: 'searchType',
       catLevel: 'div',
-      sortKey: 'searchPV',
+      sortKey: 'searchUV',
       sortDir: 'desc',
-      drilledRow: null
+      drilledRow: null,
+      dynMetrics: []
     };
+
+    function trafficActiveMetrics() {
+      var list = TRAFFIC_METRICS_FIXED.slice();
+      trafficState.dynMetrics.forEach(function (k) {
+        var f = TRAFFIC_METRICS_DYN.filter(function (m) { return m.key === k; })[0];
+        if (f) list.push(f);
+      });
+      return list;
+    }
 
     function trafficCurrentValues() {
       var d = TRAFFIC_DIMS[trafficState.dim];
@@ -1655,10 +1780,14 @@
       var gmv = uv * uvValue;
       var absentRate = rand(seed+4) * 6.5;
       var noResultRate = rand(seed+5) * 4.8;
+      var cartRate = payRate + 8 + rand(seed+6) * 12;
+      var clickRate = 28 + rand(seed+7) * 18;
+      var avgOrderValue = 32 + rand(seed+8) * 38;
       return {
         searchPV: pv, searchUV: uv, payRate: payRate,
         uvValue: uvValue, gmv: gmv,
-        absentRate: absentRate, noResultRate: noResultRate
+        absentRate: absentRate, noResultRate: noResultRate,
+        cartRate: cartRate, clickRate: clickRate, avgOrderValue: avgOrderValue
       };
     }
 
@@ -1691,14 +1820,20 @@
     function trafficRenderHeader() {
       var thead = document.getElementById('trafficThead');
       var label = trafficCurrentLabel();
+      var metrics = trafficActiveMetrics();
       var html = '<tr><th data-sortable="false">' + label + '</th>';
-      TRAFFIC_METRICS.forEach(function (m) {
+      metrics.forEach(function (m) {
         var active = trafficState.sortKey === m.key;
         var arrow = active ? (trafficState.sortDir === 'asc' ? '▲' : '▼') : '↕';
-        html += '<th class="num' + (active ? ' sort-active' : '') + '" data-key="' + m.key + '">' +
-                m.name + '<span class="sort-arrow">' + arrow + '</span></th>';
+        var sortable = m.isShare ? false : true;
+        if (sortable) {
+          html += '<th class="num' + (active ? ' sort-active' : '') + '" data-key="' + m.key + '">' +
+                  m.name + '<span class="sort-arrow">' + arrow + '</span></th>';
+        } else {
+          html += '<th class="num" data-sortable="false">' + m.name + '</th>';
+        }
       });
-      html += '<th class="num" data-sortable="false">流量占比</th></tr>';
+      html += '</tr>';
       thead.innerHTML = html;
       thead.querySelectorAll('th[data-key]').forEach(function (th) {
         th.addEventListener('click', function () {
@@ -1710,66 +1845,73 @@
       });
     }
 
+    function trafficCellHTML(metrics, totalUV, share, m) {
+      if (m.isShare) {
+        return '<td class="num">' + share.toFixed(1) + '%' +
+               '<span class="traffic-share-bar"><span class="traffic-share-fill" style="width:' + Math.min(100, share*2) + '%"></span></span>' +
+               '</td>';
+      }
+      return '<td class="num">' + trafficFmt(metrics[m.key], m.format) + '</td>';
+    }
+
     function trafficRender() {
       trafficRenderHeader();
       var tbody = document.getElementById('trafficTbody');
       var rows = trafficBuildRows();
-      var totalPV = rows.reduce(function (s, r) { return s + r.metrics.searchPV; }, 0);
+      var metrics = trafficActiveMetrics();
+      var totalUV = rows.reduce(function (s, r) { return s + r.metrics.searchUV; }, 0);
       var total = {
-        searchPV: totalPV,
-        searchUV: rows.reduce(function (s, r) { return s + r.metrics.searchUV; }, 0),
+        searchUV: totalUV,
+        searchPV: rows.reduce(function (s, r) { return s + r.metrics.searchPV; }, 0),
         gmv:      rows.reduce(function (s, r) { return s + r.metrics.gmv; }, 0)
       };
-      var weightedPay   = totalPV > 0 ? rows.reduce(function (s, r) { return s + r.metrics.payRate * r.metrics.searchPV; }, 0) / totalPV : 0;
-      var weightedUVVal = total.searchUV > 0 ? total.gmv / total.searchUV : 0;
-      var weightedAbsent= totalPV > 0 ? rows.reduce(function (s, r) { return s + r.metrics.absentRate * r.metrics.searchPV; }, 0) / totalPV : 0;
-      var weightedNoRes = totalPV > 0 ? rows.reduce(function (s, r) { return s + r.metrics.noResultRate * r.metrics.searchPV; }, 0) / totalPV : 0;
+      var weightedPay   = totalUV > 0 ? rows.reduce(function (s, r) { return s + r.metrics.payRate * r.metrics.searchUV; }, 0) / totalUV : 0;
+      var weightedUVVal = totalUV > 0 ? total.gmv / totalUV : 0;
+      var weightedAbsent= totalUV > 0 ? rows.reduce(function (s, r) { return s + r.metrics.absentRate * r.metrics.searchUV; }, 0) / totalUV : 0;
+      var weightedNoRes = totalUV > 0 ? rows.reduce(function (s, r) { return s + r.metrics.noResultRate * r.metrics.searchUV; }, 0) / totalUV : 0;
+      var weightedCart  = totalUV > 0 ? rows.reduce(function (s, r) { return s + r.metrics.cartRate * r.metrics.searchUV; }, 0) / totalUV : 0;
+      var weightedClick = totalUV > 0 ? rows.reduce(function (s, r) { return s + r.metrics.clickRate * r.metrics.searchUV; }, 0) / totalUV : 0;
+      var weightedAOV   = totalUV > 0 ? rows.reduce(function (s, r) { return s + r.metrics.avgOrderValue * r.metrics.searchUV; }, 0) / totalUV : 0;
 
       var isDrillable = trafficState.dim === 'category' && trafficState.catLevel !== 'cate';
       var nextLevel = trafficState.catLevel === 'div' ? 'dept' : 'cate';
 
       var html = '';
       rows.forEach(function (r) {
-        var share = totalPV > 0 ? (r.metrics.searchPV / totalPV) * 100 : 0;
+        var share = totalUV > 0 ? (r.metrics.searchUV / totalUV) * 100 : 0;
         var rowAttr = isDrillable ? ' class="drillable' + (trafficState.drilledRow === r.dim ? ' drilled' : '') + '" data-dim="' + r.dim + '"' : '';
         html += '<tr' + rowAttr + '><td class="traffic-dim-cell">' +
                 (isDrillable ? '<span class="drill-icon">▸</span>' : '') + r.dim + '</td>';
-        TRAFFIC_METRICS.forEach(function (m) {
-          html += '<td class="num">' + trafficFmt(r.metrics[m.key], m.format) + '</td>';
-        });
-        html += '<td class="num">' + share.toFixed(1) + '%' +
-                '<span class="traffic-share-bar"><span class="traffic-share-fill" style="width:' + Math.min(100, share*2) + '%"></span></span>' +
-                '</td></tr>';
+        metrics.forEach(function (m) { html += trafficCellHTML(r.metrics, totalUV, share, m); });
+        html += '</tr>';
 
-        // 模拟下钻：展开二级
         if (isDrillable && trafficState.drilledRow === r.dim) {
           var subValues = TRAFFIC_DIMS.category[nextLevel].slice(0, 5);
           subValues.forEach(function (sv, si) {
             var sm = trafficGenMetrics(r.dim + '_' + sv, si, subValues.length);
-            // 让子项之和 < 父项
             sm.searchPV = Math.round(sm.searchPV * 0.18);
             sm.searchUV = Math.round(sm.searchUV * 0.18);
             sm.gmv      = sm.gmv * 0.18;
-            var subShare = totalPV > 0 ? (sm.searchPV / totalPV) * 100 : 0;
+            var subShare = totalUV > 0 ? (sm.searchUV / totalUV) * 100 : 0;
             html += '<tr class="traffic-sub"><td class="traffic-dim-cell">└ ' + sv + '</td>';
-            TRAFFIC_METRICS.forEach(function (m) {
-              html += '<td class="num">' + trafficFmt(sm[m.key], m.format) + '</td>';
-            });
-            html += '<td class="num">' + subShare.toFixed(1) + '%</td></tr>';
+            metrics.forEach(function (m) { html += trafficCellHTML(sm, totalUV, subShare, m); });
+            html += '</tr>';
           });
         }
       });
 
-      // 合计行
+      // 合计 / 加权均值
+      var totalCell = function (m) {
+        if (m.isShare) return '<td class="num">100.0%</td>';
+        var fixedMap = { searchPV: total.searchPV, searchUV: total.searchUV, gmv: total.gmv,
+                         payRate: weightedPay, uvValue: weightedUVVal, absentRate: weightedAbsent,
+                         noResultRate: weightedNoRes, cartRate: weightedCart, clickRate: weightedClick,
+                         avgOrderValue: weightedAOV };
+        return '<td class="num">' + trafficFmt(fixedMap[m.key] || 0, m.format) + '</td>';
+      };
       html += '<tr class="traffic-total"><td class="traffic-dim-cell">合计 / 加权均值</td>' +
-              '<td class="num">' + trafficFmt(total.searchPV, 'int') + '</td>' +
-              '<td class="num">' + trafficFmt(total.searchUV, 'int') + '</td>' +
-              '<td class="num">' + trafficFmt(weightedPay, 'pct') + '</td>' +
-              '<td class="num">' + trafficFmt(weightedUVVal, 'yuan') + '</td>' +
-              '<td class="num">' + trafficFmt(total.gmv, 'money') + '</td>' +
-              '<td class="num">' + trafficFmt(weightedAbsent, 'pct') + '</td>' +
-              '<td class="num">' + trafficFmt(weightedNoRes, 'pct') + '</td>' +
-              '<td class="num">100.0%</td></tr>';
+              metrics.map(totalCell).join('') +
+              '</tr>';
 
       tbody.innerHTML = html;
 
@@ -1791,10 +1933,11 @@
 
     function trafficExportCSV() {
       var rows = trafficBuildRows();
-      var headers = [trafficCurrentLabel()].concat(TRAFFIC_METRICS.map(function (m) { return m.name; }));
+      var metrics = trafficActiveMetrics().filter(function (m) { return !m.isShare; });
+      var headers = [trafficCurrentLabel()].concat(metrics.map(function (m) { return m.name; }));
       var lines = [headers.join(',')];
       rows.forEach(function (r) {
-        var line = [r.dim].concat(TRAFFIC_METRICS.map(function (m) {
+        var line = [r.dim].concat(metrics.map(function (m) {
           var v = r.metrics[m.key];
           if (m.format === 'pct') return v.toFixed(2);
           if (m.format === 'money' || m.format === 'int') return Math.round(v);
@@ -1811,6 +1954,26 @@
       URL.revokeObjectURL(url);
     }
 
+    function trafficBindDyn() {
+      var btn = document.getElementById('traffic_dynBtn');
+      var pop = document.getElementById('traffic_dynPopover');
+      var badge = document.getElementById('traffic_dynBadge');
+      if (!btn) return;
+      btn.addEventListener('click', function (e) { e.stopPropagation(); pop.classList.toggle('open'); });
+      document.addEventListener('click', function () { pop.classList.remove('open'); });
+      pop.addEventListener('click', function (e) { e.stopPropagation(); });
+      pop.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          trafficState.dynMetrics = [];
+          pop.querySelectorAll('input[type="checkbox"]:checked').forEach(function (c) { trafficState.dynMetrics.push(c.value); });
+          var n = trafficState.dynMetrics.length;
+          badge.textContent = n;
+          badge.style.display = n > 0 ? 'inline-flex' : 'none';
+          trafficRender();
+        });
+      });
+    }
+
     function trafficBindControls() {
       document.querySelectorAll('#trafficDimChips .dim-chip').forEach(function (chip) {
         chip.addEventListener('click', function () {
@@ -1822,6 +1985,7 @@
           trafficRender();
         });
       });
+      trafficBindDyn();
       document.querySelectorAll('#trafficCategoryLevel .dim-sub-tab').forEach(function (tab) {
         tab.addEventListener('click', function () {
           document.querySelectorAll('#trafficCategoryLevel .dim-sub-tab').forEach(function (t) { t.classList.remove('active'); });
@@ -1838,10 +2002,11 @@
     //  PART 2 JS  (变量前缀 tm_)
     // ============================================================
     var COLOR_METRICS = {
+      cartRate:    { name:'加购率',     unit:'%', format:'pct',  good:'high', stops:[[220,252,231],[167,243,208],[34,197,94],[20,83,45]],     min:8,   max:35, tabColor:'#15803d' },
       payRate:     { name:'支付率',     unit:'%', format:'pct',  good:'high', stops:[[219,234,254],[147,197,253],[59,130,246],[30,64,175]],   min:2,   max:15, tabColor:'#1d4ed8' },
       uvValue:     { name:'UV价值',     unit:'元',format:'yuan', good:'high', stops:[[204,251,241],[94,234,212],[20,184,166],[4,78,71]],      min:0.5, max:5,  tabColor:'#0f766e' },
       noResultRate:{ name:'无结果率',   unit:'%', format:'pct',  good:'low',  stops:[[220,252,231],[187,247,208],[254,240,138],[251,146,60],[185,28,28]], min:0, max:10, tabColor:'#b91c1c' },
-      absentRate:  { name:'商品缺勤率', unit:'%', format:'pct',  good:'low',  stops:[[220,252,231],[187,247,208],[254,240,138],[251,146,60],[154,52,18]],  min:0, max:8,  tabColor:'#c2410c' }
+      absentRate:  { name:'曝光缺货率', unit:'%', format:'pct',  good:'low',  stops:[[220,252,231],[187,247,208],[254,240,138],[251,146,60],[154,52,18]],  min:0, max:8,  tabColor:'#c2410c' }
     };
 
     var TERM_NAMES = [
@@ -1856,8 +2021,8 @@
     ];
 
     var tmState = {
-      colorMetric: 'payRate', platform: 'all', region: 'all',
-      dateRange: '7d', granularity: 'daily_avg', category: 'all', hoveredIdx: -1
+      colorMetric: 'payRate', app: 'all', platform: 'all', region: 'all',
+      dateRange: 'wtd', granularity: 'daily_avg', category: 'all', hoveredIdx: -1
     };
 
     var tmCellCache = [], tmDataCache = [];
@@ -1874,6 +2039,7 @@
         var seed = hashStr(name + tmState.platform + tmState.region + tmState.dateRange);
         var uv = (5000 / Math.pow(rank, 1.18)) * (0.82 + rand(seed) * 0.36) * coef;
         return { name: name, rank: rank, uv: uv,
+                 cartRate: 10 + rand(seed+5) * 24,
                  payRate: 2.5 + rand(seed+1) * 12.5, uvValue: 0.4 + rand(seed+2) * 4.6,
                  noResultRate: rand(seed+3) * 9.8, absentRate: rand(seed+4) * 7.6 };
       });
@@ -2036,10 +2202,11 @@
         tooltip.innerHTML =
           '<div class="tt-header"><span class="tt-kw">'+nd.name+'</span><span class="tt-rank"># '+nd.rank+'</span></div>' +
           ttRow('搜索 UV',    (nd.uv/45).toFixed(1)+' 万',           false) +
+          ttRow('加购率',     nd.cartRate.toFixed(2)+'%',            cm==='cartRate') +
           ttRow('支付率',     nd.payRate.toFixed(2)+'%',             cm==='payRate') +
           ttRow('UV 价值',    '¥'+nd.uvValue.toFixed(2),             cm==='uvValue') +
           ttRow('无结果率',   nd.noResultRate.toFixed(2)+'%',        cm==='noResultRate') +
-          ttRow('商品缺勤率', nd.absentRate.toFixed(2)+'%',          cm==='absentRate');
+          ttRow('曝光缺货率', nd.absentRate.toFixed(2)+'%',          cm==='absentRate');
         tooltip.classList.add('visible');
         var tw = 210, th = 166, tx = mx+16, ty = my-10;
         if (tx+tw > rect.width)  tx = mx-tw-8;
@@ -2078,16 +2245,17 @@
         tmState.dateRange = e.target.value;
         document.getElementById('tm_customDate').classList.toggle('visible', e.target.value === 'custom');
       });
+      document.getElementById('tm_filterApp').addEventListener('change', function (e)        { tmState.app = e.target.value; });
       document.getElementById('tm_filterPlatform').addEventListener('change', function (e)   { tmState.platform = e.target.value; });
       document.getElementById('tm_filterRegion').addEventListener('change', function (e)     { tmState.region = e.target.value; });
       document.getElementById('tm_filterGranularity').addEventListener('change', function (e){ tmState.granularity = e.target.value; });
       document.getElementById('tm_filterCategory').addEventListener('change', function (e)   { tmState.category = e.target.value; });
 
       document.getElementById('tm_btnReset').addEventListener('click', function () {
-        tmState.dateRange = '7d'; tmState.platform = 'all'; tmState.region = 'all';
+        tmState.dateRange = 'wtd'; tmState.app = 'all'; tmState.platform = 'all'; tmState.region = 'all';
         tmState.granularity = 'daily_avg'; tmState.category = 'all';
-        document.getElementById('tm_filterDate').value = '7d';
-        ['tm_filterPlatform','tm_filterRegion','tm_filterCategory'].forEach(function (id) { document.getElementById(id).value = 'all'; });
+        document.getElementById('tm_filterDate').value = 'wtd';
+        ['tm_filterApp','tm_filterPlatform','tm_filterRegion','tm_filterCategory'].forEach(function (id) { document.getElementById(id).value = 'all'; });
         document.getElementById('tm_filterGranularity').value = 'daily_avg';
         document.getElementById('tm_customDate').classList.remove('visible');
         tmRefresh(true);
@@ -2116,6 +2284,7 @@
     //  2.2 重点关注词
     // ============================================================
     var AVG_PAY_RATE = 6.72;
+    var AVG_CART_RATE = 18.5;
 
     var FOCUS_CATS = [
       { id:'topWeek',    title:'本周TOP词',  desc:'本周搜索量最高',   color:'#1677ff', icon:'TOP' },
@@ -2137,12 +2306,12 @@
 
     // 每类词的搜索次数量级和支付率倾向
     var FOCUS_PROFILE = {
-      topWeek:    { countBase: 200, countStep: -22, payBase: 9,  payJitter: 8  },
-      surging:    { countBase: 48,  countStep: -4,  payBase: 7,  payJitter: 7  },
-      newTerm:    { countBase: 18,  countStep: -1.5,payBase: 5,  payJitter: 6  },
-      longGrowth: { countBase: 65,  countStep: -5,  payBase: 10, payJitter: 6  },
-      declining:  { countBase: 28,  countStep: -2,  payBase: 3,  payJitter: 5  },
-      noResult:   { countBase: 5,   countStep: -0.4,payBase: 0,  payJitter: 0  }
+      topWeek:    { countBase: 200, countStep: -22, payBase: 9,  payJitter: 8,  cartBase: 22, cartJitter: 8  },
+      surging:    { countBase: 48,  countStep: -4,  payBase: 7,  payJitter: 7,  cartBase: 20, cartJitter: 9  },
+      newTerm:    { countBase: 18,  countStep: -1.5,payBase: 5,  payJitter: 6,  cartBase: 14, cartJitter: 10 },
+      longGrowth: { countBase: 65,  countStep: -5,  payBase: 10, payJitter: 6,  cartBase: 24, cartJitter: 7  },
+      declining:  { countBase: 28,  countStep: -2,  payBase: 3,  payJitter: 5,  cartBase: 11, cartJitter: 8  },
+      noResult:   { countBase: 5,   countStep: -0.4,payBase: 0,  payJitter: 0,  cartBase: 0,  cartJitter: 0  }
     };
 
     function tmGenFocusData() {
@@ -2156,6 +2325,8 @@
           var count  = (prof.countBase + prof.countStep * i) * (0.82 + rand(seed) * 0.36) * coef;
           var payRate = cat.id === 'noResult' ? 0
                       : Math.max(0, prof.payBase + (rand(seed+1) - 0.5) * prof.payJitter * 2);
+          var cartRate = cat.id === 'noResult' ? 0
+                       : Math.max(0, prof.cartBase + (rand(seed+9) - 0.5) * prof.cartJitter * 2);
           // 周维度跟踪：本周排位变化 & 新词标记
           var isNew, rankChange;
           if (cat.id === 'newTerm') {
@@ -2181,7 +2352,7 @@
               rankChange = r > 0.55 ? Math.round((r - 0.5) * 10) : (r < 0.35 ? -Math.round((0.5 - r) * 10) : 0);
             }
           }
-          return { name: name, count: Math.max(0.1, count), payRate: payRate, isNew: isNew, rankChange: rankChange };
+          return { name: name, count: Math.max(0.1, count), payRate: payRate, cartRate: cartRate, isNew: isNew, rankChange: rankChange };
         });
       });
       return result;
@@ -2200,7 +2371,7 @@
       if (!grid) return;
       grid.innerHTML = '';
       var avgEl = document.getElementById('tm_avgLabel');
-      if (avgEl) avgEl.textContent = AVG_PAY_RATE.toFixed(2) + '%';
+      if (avgEl) avgEl.textContent = AVG_CART_RATE.toFixed(2) + '%';
 
       FOCUS_CATS.forEach(function (cat) {
         var terms = data[cat.id];
@@ -2220,14 +2391,14 @@
             '<span style="flex:1;padding-left:2px">搜索词</span>' +
             '<span class="chg-th">周变化</span>' +
             '<span style="min-width:50px;text-align:right;margin-left:8px">搜索次数</span>' +
-            '<span style="min-width:40px;text-align:right;margin-left:12px">支付率</span>' +
+            '<span style="min-width:40px;text-align:right;margin-left:12px">加购率</span>' +
           '</div>';
 
         terms.forEach(function (term, idx) {
-          var isBelow = term.payRate < AVG_PAY_RATE;
+          var isBelow = term.cartRate < AVG_CART_RATE;
           var rateCls = isBelow ? 'bad' : 'ok';
           var rankCls = idx < 3 ? 'top3' : '';
-          var rateStr = cat.id === 'noResult' ? '—' : term.payRate.toFixed(1) + '%';
+          var rateStr = cat.id === 'noResult' ? '—' : term.cartRate.toFixed(1) + '%';
 
           var chgHtml;
           if (term.isNew) {
@@ -2253,7 +2424,7 @@
         });
 
         html +=
-          '<div class="focus-footer">大盘均值 ' + AVG_PAY_RATE.toFixed(2) + '% · ' +
+          '<div class="focus-footer">加购率大盘均值 ' + AVG_CART_RATE.toFixed(2) + '% · ' +
             '<span class="tchg new" style="font-size:9px;padding:0 4px">NEW</span> 本周新增 · ' +
             '<span style="color:var(--success)">↑</span>/<span style="color:var(--danger)">↓</span> 周排位变化' +
           '</div>';
@@ -2280,13 +2451,19 @@
       { key: 'cartRate',     name: '加购率',     color: '#00b96b', format: 'pct'  },
       { key: 'uvValue',      name: 'UV价值',     color: '#fa541c', format: 'yuan' },
       { key: 'noResultRate', name: '无结果率',   color: '#faad14', format: 'pct'  },
-      { key: 'absentRate',   name: '商品缺勤率', color: '#ff4d4f', format: 'pct'  }
+      { key: 'absentRate',   name: '曝光缺货率', color: '#ff4d4f', format: 'pct'  }
     ];
 
     var KW_METRICS_PRODUCT = [
       { key: 'impCount',  name: '商品曝光次数', color: '#1677ff', format: 'int'   },
       { key: 'payRate',   name: '支付率',       color: '#722ed1', format: 'pct'   },
       { key: 'gmvPer1k',  name: '千次曝光GMV',  color: '#fa8c16', format: 'money' }
+    ];
+
+    var KW_METRICS_PRODUCT_DYN = [
+      { key: 'cartRate',  name: '加购率',       color: '#13c2c2', format: 'pct'   },
+      { key: 'impUV',     name: '曝光人数',     color: '#00b96b', format: 'int'   },
+      { key: 'clickRate', name: '点击率',       color: '#fa541c', format: 'pct'   }
     ];
 
     var KW_PRODUCT_POOL = [
@@ -2304,10 +2481,12 @@
       trendMetric: 'searchCount',
       minSearch: 50,
       productList: 'all',
+      upc: '',
       dateStart: '2026-05-20',
       dateEnd: '2026-05-26',
       granularity: 'day',
-      dynMetrics: []
+      dynMetrics: [],
+      dynMetricsProduct: []
     };
 
     function kwIsAll() {
@@ -2318,7 +2497,14 @@
     var kwChartGeometry = null;
 
     function kwGetActiveMetrics() {
-      if (kwState.subTab === 'product') return KW_METRICS_PRODUCT;
+      if (kwState.subTab === 'product') {
+        var p = KW_METRICS_PRODUCT.slice();
+        kwState.dynMetricsProduct.forEach(function (key) {
+          var found = KW_METRICS_PRODUCT_DYN.filter(function (m) { return m.key === key; })[0];
+          if (found) p.push(found);
+        });
+        return p;
+      }
       var active = KW_METRICS_DEFAULT.slice();
       kwState.dynMetrics.forEach(function (key) {
         var found = KW_METRICS_DYN.filter(function (m) { return m.key === key; })[0];
@@ -2327,8 +2513,20 @@
       return active;
     }
 
+    function kwParseQueries() {
+      // 多关键词支持：逗号或空格分隔
+      if (kwIsAll()) return [];
+      var raw = (kwState.keyword || '').trim();
+      return raw.split(/[,，\s]+/).map(function (s) { return s.trim(); }).filter(Boolean);
+    }
+
     function kwSyncDatesFromTm() {
-      var map = { yesterday: ['2026-05-25','2026-05-25'], '7d': ['2026-05-20','2026-05-26'], '30d': ['2026-04-27','2026-05-26'] };
+      var map = {
+        yesterday: ['2026-06-01','2026-06-01'],
+        wtd:       ['2026-06-01','2026-06-02'],   // WTD: 自然周至今（周一起）
+        mtd:       ['2026-06-01','2026-06-02'],   // MTD: 本月至今
+        ytd:       ['2026-01-01','2026-06-02']    // YTD: 本年至今
+      };
       var r;
       if (tmState.dateRange === 'custom') {
         var ts = document.getElementById('tm_dateStart');
@@ -2394,7 +2592,15 @@
       var seed = hashStr(term + product + dateStr + kwState.productList);
       var imp = Math.round((32000 - rank * 900) * (0.85 + rand(seed) * 0.3) * tmFilterCoef());
       imp = Math.max(120, imp);
-      return { impCount: imp, payRate: 12 + rand(seed+1) * 28, gmvPer1k: 800 + rand(seed+3) * 4200 };
+      var pay = 12 + rand(seed+1) * 28;
+      return {
+        impCount: imp,
+        payRate: pay,
+        gmvPer1k: 800 + rand(seed+3) * 4200,
+        cartRate: pay + 6 + rand(seed+5) * 14,
+        impUV: Math.round(imp * (0.42 + rand(seed+6) * 0.18)),
+        clickRate: 18 + rand(seed+7) * 22
+      };
     }
 
     function kwMatchKeyword(term, query) {
@@ -2456,15 +2662,20 @@
     function kwBuildKeywordTableRows() {
       var dates = kwDateList();
       var listLabel = kwProductListLabel(kwState.productList);
-      var rows = [], query = kwIsAll() ? '' : (kwState.keyword || '').trim();
-      if (query) {
-        var matched = TERM_NAMES.filter(function (t) { return kwMatchKeyword(t, query); });
-        if (matched.length === 0) matched = [query];
-        matched.forEach(function (term) {
+      var rows = [];
+      var queries = kwParseQueries();
+      if (queries.length) {
+        var matchedSet = {};
+        queries.forEach(function (q) {
+          var m = TERM_NAMES.filter(function (t) { return kwMatchKeyword(t, q); });
+          if (m.length === 0) m = [q];
+          m.forEach(function (t) { matchedSet[t] = true; });
+        });
+        Object.keys(matchedSet).forEach(function (term) {
           dates.forEach(function (d) {
-            var m = kwGenKeywordMetrics(term, d);
-            if (m.searchCount < kwState.minSearch) return;
-            rows.push({ date: d, keyword: term, list: listLabel, metrics: m });
+            var mm = kwGenKeywordMetrics(term, d);
+            if (mm.searchCount < kwState.minSearch) return;
+            rows.push({ date: d, keyword: term, list: listLabel, metrics: mm });
           });
         });
         return rows;
@@ -2475,21 +2686,27 @@
         if (m.searchCount < kwState.minSearch) return;
         rows.push({ date: lastDate, keyword: term, list: listLabel, metrics: m });
       });
-      rows.sort(function (a, b) { return b.metrics.searchCount - a.metrics.searchCount; });
+      rows.sort(function (a, b) { return b.metrics.searchUV - a.metrics.searchUV; });
       return rows.slice(0, 80);
     }
 
     function kwBuildProductTableRows() {
-      if (kwIsAll()) return [];
-      var query = (kwState.keyword || '').trim();
+      var queries = kwParseQueries();
+      if (queries.length === 0) return [];
       var dates = kwDateList();
       var listLabel = kwProductListLabel(kwState.productList);
-      var matched = TERM_NAMES.filter(function (t) { return kwMatchKeyword(t, query); });
-      var term = matched.length ? matched[0] : query;
       var showDate = dates[dates.length - 1];
+      // 多关键词：取第一个匹配词
+      var q = queries[0];
+      var matched = TERM_NAMES.filter(function (t) { return kwMatchKeyword(t, q); });
+      var term = matched.length ? matched[0] : q;
       var rows = [];
+      var upcQuery = (kwState.upc || '').trim().toLowerCase();
       KW_PRODUCT_POOL.slice(0, 30).forEach(function (product, i) {
-        rows.push({ product: product, list: listLabel, metrics: kwGenProductMetrics(term, product, showDate, i) });
+        // UPC 用商品名 hash 模拟
+        var upc = 'UPC' + (1000000 + (hashStr(product) % 9000000));
+        if (upcQuery && upc.toLowerCase().indexOf(upcQuery) === -1 && product.indexOf(kwState.upc) === -1) return;
+        rows.push({ product: product, upc: upc, list: listLabel, metrics: kwGenProductMetrics(term, product, showDate, i) });
       });
       rows.sort(function (a, b) { return b.metrics.gmvPer1k - a.metrics.gmvPer1k; });
       return rows;
@@ -2504,16 +2721,21 @@
       var rows;
 
       if (kwState.subTab === 'product') {
+        var dynMetsP = kwState.dynMetricsProduct.map(function (key) {
+          return KW_METRICS_PRODUCT_DYN.filter(function (m) { return m.key === key; })[0];
+        }).filter(Boolean);
+        var dynThP = dynMetsP.map(function (m) { return '<th class="num">'+m.name+'</th>'; }).join('');
         thead.innerHTML =
           '<tr>' +
-            '<th>商品名称</th><th>商品列表</th>' +
+            '<th>商品名称</th><th>UPC</th><th>商品列表</th>' +
             '<th class="num">商品曝光次数</th>' +
             '<th class="num">支付率</th>' +
             '<th class="num">千次曝光GMV ↓</th>' +
+            dynThP +
           '</tr>';
         rows = kwBuildProductTableRows();
         if (!rows.length) {
-          tbody.innerHTML = '<tr><td colspan="5"><div class="kw-empty">请输入关键词并检索，查看该词 TOP30 曝光商品表现（按千次曝光GMV排序）</div></td></tr>';
+          tbody.innerHTML = '<tr><td colspan="'+(6+dynMetsP.length)+'"><div class="kw-empty">请输入关键词并检索，查看该词 TOP30 曝光商品表现（按千次曝光GMV排序）</div></td></tr>';
           if (footer) footer.textContent = '';
           kwRenderHint(0); return;
         }
@@ -2523,12 +2745,15 @@
           var tr = document.createElement('tr');
           var g = r.metrics.gmvPer1k;
           var cls = g >= median * 1.2 ? 'gmv1k-hi' : (g < median * 0.8 ? 'gmv1k-lo' : '');
+          var dynTdP = dynMetsP.map(function (m) { return '<td class="num">'+kwFmtMetric(r.metrics[m.key], m.format)+'</td>'; }).join('');
           tr.innerHTML =
             '<td><span style="color:var(--text-sub);font-size:12px;margin-right:4px">'+(idx+1)+'.</span>'+r.product+'</td>' +
+            '<td style="color:var(--text-sub);font-size:12px">'+r.upc+'</td>' +
             '<td>'+r.list+'</td>' +
             '<td class="num">'+kwFmtNum(r.metrics.impCount)+'</td>' +
             '<td class="num">'+r.metrics.payRate.toFixed(1)+'%</td>' +
-            '<td class="num"><span class="'+cls+'">¥'+Math.round(g).toLocaleString('zh-CN')+'</span></td>';
+            '<td class="num"><span class="'+cls+'">¥'+Math.round(g).toLocaleString('zh-CN')+'</span></td>' +
+            dynTdP;
           tbody.appendChild(tr);
         });
       } else {
@@ -2782,25 +3007,92 @@
       kwDrawTrend();
     }
 
-    function kwBindDynPopover() {
-      var btn   = document.getElementById('kw_dynBtn');
-      var pop   = document.getElementById('kw_dynPopover');
+    function kwExportCSV() {
+      var rows, headers, lines;
+      if (kwState.subTab === 'product') {
+        rows = kwBuildProductTableRows();
+        var dynP = kwState.dynMetricsProduct.map(function (k) { return KW_METRICS_PRODUCT_DYN.filter(function(m){return m.key===k;})[0]; }).filter(Boolean);
+        headers = ['商品名称','UPC','商品列表','商品曝光次数','支付率','千次曝光GMV'].concat(dynP.map(function(m){return m.name;}));
+        lines = [headers.join(',')];
+        rows.forEach(function (r) {
+          var line = [r.product, r.upc, r.list, r.metrics.impCount, r.metrics.payRate.toFixed(2), Math.round(r.metrics.gmvPer1k)]
+            .concat(dynP.map(function (m) {
+              var v = r.metrics[m.key];
+              return m.format === 'pct' ? v.toFixed(2) : Math.round(v);
+            }));
+          lines.push(line.join(','));
+        });
+      } else {
+        rows = kwBuildKeywordTableRows();
+        var dyn = kwState.dynMetrics.map(function (k) { return KW_METRICS_DYN.filter(function(m){return m.key===k;})[0]; }).filter(Boolean);
+        headers = ['日期','关键词','商品列表','搜索次数','搜索人数','支付率','GMV'].concat(dyn.map(function(m){return m.name;}));
+        lines = [headers.join(',')];
+        rows.forEach(function (r) {
+          var line = [r.date, r.keyword, r.list, r.metrics.searchCount, r.metrics.searchUV, r.metrics.payRate.toFixed(2), Math.round(r.metrics.gmv)]
+            .concat(dyn.map(function (m) {
+              var v = r.metrics[m.key];
+              if (m.format === 'pct') return v.toFixed(2);
+              if (m.format === 'yuan') return v.toFixed(2);
+              return Math.round(v);
+            }));
+          lines.push(line.join(','));
+        });
+      }
+      var csv = '﻿' + lines.join('\n');
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = '搜索关键词表现_' + (kwState.subTab === 'product' ? '商品' : '关键词') + '_' + kwState.dateStart + '_' + kwState.dateEnd + '.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function kwRenderDynPopover() {
+      var list = document.getElementById('kw_dynPopList');
+      var title = document.getElementById('kw_dynPopTitle');
       var badge = document.getElementById('kw_dynBadge');
+      if (!list) return;
+      var items, current;
+      if (kwState.subTab === 'product') {
+        items = KW_METRICS_PRODUCT_DYN;
+        current = kwState.dynMetricsProduct;
+        title.textContent = '选择附加指标（商品表）';
+      } else {
+        items = KW_METRICS_DYN;
+        current = kwState.dynMetrics;
+        title.textContent = '选择附加指标（关键词表）';
+      }
+      list.innerHTML = items.map(function (m) {
+        var checked = current.indexOf(m.key) !== -1 ? ' checked' : '';
+        return '<label class="dyn-pop-item"><input type="checkbox" value="'+m.key+'"'+checked+' />'+m.name+'</label>';
+      }).join('');
+      badge.textContent = current.length;
+      badge.style.display = current.length > 0 ? 'inline-flex' : 'none';
+
+      list.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          var arr = [];
+          list.querySelectorAll('input[type="checkbox"]:checked').forEach(function (c) { arr.push(c.value); });
+          if (kwState.subTab === 'product') kwState.dynMetricsProduct = arr;
+          else kwState.dynMetrics = arr;
+          badge.textContent = arr.length;
+          badge.style.display = arr.length > 0 ? 'inline-flex' : 'none';
+          if (!kwGetActiveMetrics().some(function (m) { return m.key === kwState.trendMetric; })) {
+            kwState.trendMetric = kwGetActiveMetrics()[0].key;
+          }
+          kwRefreshAll();
+        });
+      });
+    }
+
+    function kwBindDynPopover() {
+      var btn = document.getElementById('kw_dynBtn');
+      var pop = document.getElementById('kw_dynPopover');
       if (!btn || !pop) return;
       btn.addEventListener('click', function (e) { e.stopPropagation(); pop.classList.toggle('open'); });
       document.addEventListener('click', function () { pop.classList.remove('open'); });
       pop.addEventListener('click', function (e) { e.stopPropagation(); });
-      pop.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
-        cb.addEventListener('change', function () {
-          kwState.dynMetrics = [];
-          pop.querySelectorAll('input[type="checkbox"]:checked').forEach(function (c) { kwState.dynMetrics.push(c.value); });
-          var n = kwState.dynMetrics.length;
-          badge.textContent = n;
-          badge.style.display = n > 0 ? 'inline-flex' : 'none';
-          if (!kwGetActiveMetrics().some(function (m) { return m.key === kwState.trendMetric; })) kwState.trendMetric = 'searchCount';
-          kwRefreshAll();
-        });
-      });
+      kwRenderDynPopover();
     }
 
     function kwBindControls() {
@@ -2814,14 +3106,18 @@
 
       document.getElementById('kw_searchBtn').addEventListener('click', applySearch);
       document.getElementById('kw_clearBtn').addEventListener('click', function () {
-        kwState.keyword = 'ALL';
-        var input = document.getElementById('kw_search');
-        if (input) input.value = 'ALL';
+        kwState.keyword = 'ALL'; kwState.upc = '';
+        var input = document.getElementById('kw_search'); if (input) input.value = 'ALL';
+        var upc = document.getElementById('kw_upc'); if (upc) upc.value = '';
         kwRefreshAll();
       });
       document.getElementById('kw_apply').addEventListener('click', function () {
+        kwState.dateStart = document.getElementById('kw_dateStart').value || kwState.dateStart;
+        kwState.dateEnd   = document.getElementById('kw_dateEnd').value   || kwState.dateEnd;
         kwState.minSearch = parseInt(document.getElementById('kw_minSearch').value, 10) || 0;
         kwState.productList = document.getElementById('kw_productList').value;
+        var upcEl = document.getElementById('kw_upc');
+        kwState.upc = upcEl ? upcEl.value.trim() : '';
         applySearch();
       });
 
@@ -2833,9 +3129,16 @@
           tab.classList.add('active');
           kwState.subTab = tab.getAttribute('data-kwtab');
           kwState.trendMetric = kwGetActiveMetrics()[0].key;
+          // 切换子tab时显隐 UPC / 搜索人数阈值
+          document.getElementById('kw_minSearchWrap').style.display = kwState.subTab === 'product' ? 'none' : '';
+          document.getElementById('kw_upcWrap').style.display = kwState.subTab === 'product' ? '' : 'none';
+          kwRenderDynPopover();
           kwRefreshAll();
         });
       });
+
+      var exportBtn = document.getElementById('kw_export');
+      if (exportBtn) exportBtn.addEventListener('click', kwExportCSV);
 
       document.querySelectorAll('#kw_granularity .granularity-tab').forEach(function (tab) {
         tab.addEventListener('click', function () {
