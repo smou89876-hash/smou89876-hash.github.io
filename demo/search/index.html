@@ -2484,29 +2484,40 @@
     //  2.3 搜索关键词表现（全量报表）
     // ============================================================
     var KW_METRICS_DEFAULT = [
-      { key: 'searchCount', name: '搜索次数', color: '#1677ff', format: 'int'   },
-      { key: 'searchUV',    name: '搜索人数', color: '#13c2c2', format: 'int'   },
-      { key: 'payRate',     name: '支付率',   color: '#722ed1', format: 'pct'   },
-      { key: 'gmv',         name: 'GMV',      color: '#fa8c16', format: 'money' }
+      { key: 'searchUV',         name: '搜索人数',     color: '#1677ff', format: 'int'   },
+      { key: 'cartRate',         name: '加购率',       color: '#13c2c2', format: 'pct'   },
+      { key: 'payRate',          name: '支付率',       color: '#722ed1', format: 'pct'   },
+      { key: 'gmv',              name: 'GMV',          color: '#fa8c16', format: 'money' },
+      { key: 'avgRecallSkuCnt',  name: '平均召回商品数', color: '#00b96b', format: 'int'   }
     ];
 
+    // 动态指标库（从「六、指标库」摘取适用于关键词表的指标）
     var KW_METRICS_DYN = [
-      { key: 'cartRate',     name: '加购率',     color: '#00b96b', format: 'pct'  },
-      { key: 'uvValue',      name: 'UV价值',     color: '#fa541c', format: 'yuan' },
-      { key: 'noResultRate', name: '无结果率',   color: '#faad14', format: 'pct'  },
-      { key: 'absentRate',   name: '曝光缺货率', color: '#ff4d4f', format: 'pct'  }
+      { key: 'searchCount',  name: '搜索次数(PV)',     color: '#4096ff', format: 'int'  },
+      { key: 'uvValue',      name: 'UV价值',           color: '#fa541c', format: 'yuan' },
+      { key: 'avgOrderValue',name: '客单价',           color: '#a78bfa', format: 'yuan' },
+      { key: 'clickRate',    name: '点击率',           color: '#06b6d4', format: 'pct'  },
+      { key: 'noResultRate', name: '无结果率',         color: '#faad14', format: 'pct'  },
+      { key: 'absentRate',   name: '曝光缺货率',       color: '#ff4d4f', format: 'pct'  },
+      { key: 'refundRate',   name: '退款率',           color: '#9ca3af', format: 'pct'  },
+      { key: 'dwellSec',     name: '平均搜索停留时长', color: '#7c3aed', format: 'sec'  }
     ];
 
     var KW_METRICS_PRODUCT = [
-      { key: 'impCount',  name: '商品曝光次数', color: '#1677ff', format: 'int'   },
-      { key: 'payRate',   name: '支付率',       color: '#722ed1', format: 'pct'   },
-      { key: 'gmvPer1k',  name: '千次曝光GMV',  color: '#fa8c16', format: 'money' }
+      { key: 'impCount',  name: '商品曝光次数',  color: '#1677ff', format: 'int'   },
+      { key: 'cartRate',  name: '加购率',        color: '#13c2c2', format: 'pct'   },
+      { key: 'payRate',   name: '支付率',        color: '#722ed1', format: 'pct'   },
+      { key: 'gmvPer1k',  name: '千次曝光GMV',   color: '#fa8c16', format: 'money' }
     ];
 
+    // 商品动态指标库
     var KW_METRICS_PRODUCT_DYN = [
-      { key: 'cartRate',  name: '加购率',       color: '#13c2c2', format: 'pct'   },
-      { key: 'impUV',     name: '曝光人数',     color: '#00b96b', format: 'int'   },
-      { key: 'clickRate', name: '点击率',       color: '#fa541c', format: 'pct'   }
+      { key: 'impUV',         name: '曝光人数',  color: '#00b96b', format: 'int'   },
+      { key: 'clickUV',       name: '点击人数',  color: '#06b6d4', format: 'int'   },
+      { key: 'clickRate',     name: '点击率',    color: '#fa541c', format: 'pct'   },
+      { key: 'avgOrderValue', name: '客单价',    color: '#a78bfa', format: 'yuan'  },
+      { key: 'refundRate',    name: '退款率',    color: '#9ca3af', format: 'pct'   },
+      { key: 'productScore',  name: '商品评分',  color: '#faad14', format: 'score' }
     ];
 
     var KW_PRODUCT_POOL = [
@@ -2521,7 +2532,7 @@
     var kwState = {
       subTab: 'keyword',
       keyword: 'ALL',
-      trendMetric: 'searchCount',
+      trendMetric: 'searchUV',
       minSearch: 50,
       productList: 'all',
       upc: '',
@@ -2605,6 +2616,8 @@
       if (format === 'pct')   return val.toFixed(1)+'%';
       if (format === 'money') return '¥'+Math.round(val).toLocaleString('zh-CN');
       if (format === 'yuan')  return '¥'+val.toFixed(2);
+      if (format === 'sec')   return Math.round(val)+'s';
+      if (format === 'score') return val.toFixed(1);
       return kwFmtNum(val);
     }
 
@@ -2619,15 +2632,24 @@
       var rankIdx = TERM_NAMES.indexOf(term);
       if (rankIdx < 0) rankIdx = hashStr(term) % 80;
       var base = Math.max(800, 68000 - rankIdx * 720) * (0.88 + rand(seed) * 0.24) * tmFilterCoef();
+      var searchUV = Math.round(base * (0.62 + rand(seed+5) * 0.12));
+      var cartRate = 45 + rand(seed+1) * 22;
+      var payRate  = 18 + rand(seed+2) * 18;
+      var gmv      = base * (12 + rand(seed+3) * 8);
       return {
-        searchCount:   Math.round(base),
-        searchUV:      Math.round(base * (0.62 + rand(seed+5) * 0.12)),
-        cartRate:      45 + rand(seed+1) * 22,
-        payRate:       18 + rand(seed+2) * 18,
-        gmv:           base * (12 + rand(seed+3) * 8),
-        uvValue:       1.2 + rand(seed+6) * 3.8,
-        noResultRate:  rand(seed+7) * 6.5,
-        absentRate:    rand(seed+8) * 4.8
+        searchCount:      Math.round(base),
+        searchUV:         searchUV,
+        cartRate:         cartRate,
+        payRate:          payRate,
+        gmv:              gmv,
+        uvValue:          1.2 + rand(seed+6) * 3.8,
+        noResultRate:     rand(seed+7) * 6.5,
+        absentRate:       rand(seed+8) * 4.8,
+        avgRecallSkuCnt:  Math.round(60 + rand(seed+9) * 240),
+        avgOrderValue:    32 + rand(seed+10) * 38,
+        clickRate:        38 + rand(seed+11) * 22,
+        refundRate:       1 + rand(seed+12) * 4.5,
+        dwellSec:         18 + rand(seed+13) * 28
       };
     }
 
@@ -2636,13 +2658,19 @@
       var imp = Math.round((32000 - rank * 900) * (0.85 + rand(seed) * 0.3) * tmFilterCoef());
       imp = Math.max(120, imp);
       var pay = 12 + rand(seed+1) * 28;
+      var impUV = Math.round(imp * (0.42 + rand(seed+6) * 0.18));
+      var clickRate = 18 + rand(seed+7) * 22;
       return {
-        impCount: imp,
-        payRate: pay,
-        gmvPer1k: 800 + rand(seed+3) * 4200,
-        cartRate: pay + 6 + rand(seed+5) * 14,
-        impUV: Math.round(imp * (0.42 + rand(seed+6) * 0.18)),
-        clickRate: 18 + rand(seed+7) * 22
+        impCount:       imp,
+        payRate:        pay,
+        gmvPer1k:       800 + rand(seed+3) * 4200,
+        cartRate:       pay + 6 + rand(seed+5) * 14,
+        impUV:          impUV,
+        clickRate:      clickRate,
+        clickUV:        Math.round(impUV * clickRate / 100),
+        avgOrderValue:  28 + rand(seed+8) * 42,
+        refundRate:     1 + rand(seed+9) * 5,
+        productScore:   3.6 + rand(seed+10) * 1.4
       };
     }
 
@@ -2751,7 +2779,7 @@
         if (upcQuery && upc.toLowerCase().indexOf(upcQuery) === -1 && product.indexOf(kwState.upc) === -1) return;
         rows.push({ product: product, upc: upc, list: listLabel, metrics: kwGenProductMetrics(term, product, showDate, i) });
       });
-      rows.sort(function (a, b) { return b.metrics.gmvPer1k - a.metrics.gmvPer1k; });
+      rows.sort(function (a, b) { return b.metrics.impCount - a.metrics.impCount; });
       return rows;
     }
 
@@ -2771,14 +2799,15 @@
         thead.innerHTML =
           '<tr>' +
             '<th>商品名称</th><th>UPC</th><th>商品列表</th>' +
-            '<th class="num">商品曝光次数</th>' +
+            '<th class="num">商品曝光次数 ↓</th>' +
+            '<th class="num">加购率</th>' +
             '<th class="num">支付率</th>' +
-            '<th class="num">千次曝光GMV ↓</th>' +
+            '<th class="num">千次曝光GMV</th>' +
             dynThP +
           '</tr>';
         rows = kwBuildProductTableRows();
         if (!rows.length) {
-          tbody.innerHTML = '<tr><td colspan="'+(6+dynMetsP.length)+'"><div class="kw-empty">请输入关键词并检索，查看该词 TOP30 曝光商品表现（按千次曝光GMV排序）</div></td></tr>';
+          tbody.innerHTML = '<tr><td colspan="'+(7+dynMetsP.length)+'"><div class="kw-empty">请输入关键词并检索，查看该词 TOP30 曝光商品表现（按商品曝光次数降序）</div></td></tr>';
           if (footer) footer.textContent = '';
           kwRenderHint(0); return;
         }
@@ -2794,6 +2823,7 @@
             '<td style="color:var(--text-sub);font-size:12px">'+r.upc+'</td>' +
             '<td>'+r.list+'</td>' +
             '<td class="num">'+kwFmtNum(r.metrics.impCount)+'</td>' +
+            '<td class="num">'+r.metrics.cartRate.toFixed(1)+'%</td>' +
             '<td class="num">'+r.metrics.payRate.toFixed(1)+'%</td>' +
             '<td class="num"><span class="'+cls+'">¥'+Math.round(g).toLocaleString('zh-CN')+'</span></td>' +
             dynTdP;
@@ -2807,13 +2837,16 @@
         thead.innerHTML =
           '<tr>' +
             '<th>日期</th><th>关键词</th><th>商品列表</th>' +
-            '<th class="num">搜索次数</th><th class="num">搜索人数</th>' +
-            '<th class="num">支付率</th><th class="num">GMV</th>' +
+            '<th class="num">搜索人数 ↓</th>' +
+            '<th class="num">加购率</th>' +
+            '<th class="num">支付率</th>' +
+            '<th class="num">GMV</th>' +
+            '<th class="num">平均召回商品数</th>' +
             dynTh +
           '</tr>';
         rows = kwBuildKeywordTableRows();
         if (!rows.length) {
-          tbody.innerHTML = '<tr><td colspan="'+(7+dynMets.length)+'"><div class="kw-empty">无匹配数据，请调整关键词或搜索次数阈值</div></td></tr>';
+          tbody.innerHTML = '<tr><td colspan="'+(8+dynMets.length)+'"><div class="kw-empty">无匹配数据，请调整关键词或搜索人数阈值</div></td></tr>';
           if (footer) footer.textContent = '';
           kwRenderHint(0); return;
         }
@@ -2825,10 +2858,11 @@
             '<td>'+r.date+'</td>' +
             '<td><span class="kw-link" data-kw="'+r.keyword+'">'+r.keyword+'</span></td>' +
             '<td>'+r.list+'</td>' +
-            '<td class="num">'+kwFmtNum(r.metrics.searchCount)+'</td>' +
             '<td class="num">'+kwFmtNum(r.metrics.searchUV)+'</td>' +
+            '<td class="num">'+r.metrics.cartRate.toFixed(1)+'%</td>' +
             '<td class="num">'+r.metrics.payRate.toFixed(1)+'%</td>' +
             '<td class="num">¥'+Math.round(r.metrics.gmv).toLocaleString('zh-CN')+'</td>' +
+            '<td class="num">'+kwFmtNum(r.metrics.avgRecallSkuCnt)+'</td>' +
             dynTd;
           tbody.appendChild(tr);
         });
@@ -2837,7 +2871,7 @@
         });
       }
 
-      if (footer) footer.textContent = '共 '+rows.length+' 条' + (kwState.subTab === 'product' ? ' · 按千次曝光GMV降序 · 绿色=高于中位数20% 红色=低于中位数20%' : ' · 点击关键词快速下钻');
+      if (footer) footer.textContent = '共 '+rows.length+' 条' + (kwState.subTab === 'product' ? ' · 按商品曝光次数降序 · 千次曝光GMV：绿色=高于中位数20% 红色=低于中位数20%' : ' · 按搜索人数降序 · 点击关键词快速下钻');
       kwRenderHint(rows.length);
     }
 
@@ -3055,23 +3089,25 @@
       if (kwState.subTab === 'product') {
         rows = kwBuildProductTableRows();
         var dynP = kwState.dynMetricsProduct.map(function (k) { return KW_METRICS_PRODUCT_DYN.filter(function(m){return m.key===k;})[0]; }).filter(Boolean);
-        headers = ['商品名称','UPC','商品列表','商品曝光次数','支付率','千次曝光GMV'].concat(dynP.map(function(m){return m.name;}));
+        headers = ['商品名称','UPC','商品列表','商品曝光次数','加购率','支付率','千次曝光GMV'].concat(dynP.map(function(m){return m.name;}));
         lines = [headers.join(',')];
         rows.forEach(function (r) {
-          var line = [r.product, r.upc, r.list, r.metrics.impCount, r.metrics.payRate.toFixed(2), Math.round(r.metrics.gmvPer1k)]
+          var line = [r.product, r.upc, r.list, r.metrics.impCount, r.metrics.cartRate.toFixed(2), r.metrics.payRate.toFixed(2), Math.round(r.metrics.gmvPer1k)]
             .concat(dynP.map(function (m) {
               var v = r.metrics[m.key];
-              return m.format === 'pct' ? v.toFixed(2) : Math.round(v);
+              if (m.format === 'pct') return v.toFixed(2);
+              if (m.format === 'yuan' || m.format === 'score') return v.toFixed(2);
+              return Math.round(v);
             }));
           lines.push(line.join(','));
         });
       } else {
         rows = kwBuildKeywordTableRows();
         var dyn = kwState.dynMetrics.map(function (k) { return KW_METRICS_DYN.filter(function(m){return m.key===k;})[0]; }).filter(Boolean);
-        headers = ['日期','关键词','商品列表','搜索次数','搜索人数','支付率','GMV'].concat(dyn.map(function(m){return m.name;}));
+        headers = ['日期','关键词','商品列表','搜索人数','加购率','支付率','GMV','平均召回商品数'].concat(dyn.map(function(m){return m.name;}));
         lines = [headers.join(',')];
         rows.forEach(function (r) {
-          var line = [r.date, r.keyword, r.list, r.metrics.searchCount, r.metrics.searchUV, r.metrics.payRate.toFixed(2), Math.round(r.metrics.gmv)]
+          var line = [r.date, r.keyword, r.list, r.metrics.searchUV, r.metrics.cartRate.toFixed(2), r.metrics.payRate.toFixed(2), Math.round(r.metrics.gmv), r.metrics.avgRecallSkuCnt]
             .concat(dyn.map(function (m) {
               var v = r.metrics[m.key];
               if (m.format === 'pct') return v.toFixed(2);
