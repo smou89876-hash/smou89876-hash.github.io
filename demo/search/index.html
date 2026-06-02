@@ -952,42 +952,42 @@
       </div>
       <div class="kpi-grid" id="kpiGrid"></div>
 
-      <!-- 核心指标趋势 -->
-      <div class="section-title">
-        <h2>核心指标趋势</h2>
-        <div class="hint">最多同时对比 3 个指标，点击上方指标卡切换</div>
-      </div>
-      <div class="panel" style="position:relative;">
-        <div class="panel-header">
-          <div class="metric-chips" id="metricChips" style="margin:0"></div>
-          <div class="granularity-tabs" id="trendGranularity">
-            <div class="granularity-tab active" data-g="day">日</div>
-            <div class="granularity-tab" data-g="week">自然周</div>
-            <div class="granularity-tab" data-g="month">月</div>
+      <!-- 核心指标趋势 + 搜索转化漏斗（并排） -->
+      <div class="content-grid" style="grid-template-columns: 1.4fr 1fr;">
+        <div class="panel" style="position:relative;">
+          <div class="panel-header">
+            <div>
+              <h3>核心指标趋势</h3>
+              <div class="desc">最多同时对比 3 个指标</div>
+            </div>
+            <div class="granularity-tabs" id="trendGranularity">
+              <div class="granularity-tab active" data-g="day">日</div>
+              <div class="granularity-tab" data-g="week">自然周</div>
+              <div class="granularity-tab" data-g="month">月</div>
+            </div>
           </div>
+          <div class="metric-chips" id="metricChips"></div>
+          <div class="chart-wrap">
+            <canvas id="trendChart"></canvas>
+            <div class="chart-tooltip" id="chartTooltip"></div>
+          </div>
+          <div class="loading-overlay" id="trendLoading"><div class="spinner"></div></div>
         </div>
-        <div class="chart-wrap" style="height:340px">
-          <canvas id="trendChart"></canvas>
-          <div class="chart-tooltip" id="chartTooltip"></div>
-        </div>
-        <div class="loading-overlay" id="trendLoading"><div class="spinner"></div></div>
-      </div>
 
-      <!-- 搜索转化漏斗 -->
-      <div class="section-title" style="margin-top:20px">
-        <h2>搜索转化漏斗</h2>
-        <div class="hint">用户从搜索到支付的完整路径，定位流失环节</div>
-      </div>
-      <div class="panel" style="position:relative;">
-        <div class="panel-header">
-          <div></div>
-          <div class="granularity-tabs" id="funnelView">
-            <div class="granularity-tab active" data-view="uv">UV</div>
-            <div class="granularity-tab" data-view="pv">PV</div>
+        <div class="panel" style="position:relative;">
+          <div class="panel-header">
+            <div>
+              <h3>搜索转化漏斗</h3>
+              <div class="desc">定位用户流失环节</div>
+            </div>
+            <div class="granularity-tabs" id="funnelView">
+              <div class="granularity-tab active" data-view="uv">UV</div>
+              <div class="granularity-tab" data-view="pv">PV</div>
+            </div>
           </div>
+          <div class="funnel" id="funnel"></div>
+          <div class="loading-overlay" id="funnelLoading"><div class="spinner"></div></div>
         </div>
-        <div class="funnel" id="funnel"></div>
-        <div class="loading-overlay" id="funnelLoading"><div class="spinner"></div></div>
       </div>
 
       <!-- 搜索流量报表（下钻分析） -->
@@ -1156,10 +1156,18 @@
       <!-- 重点关注词 -->
       <div class="section-title" style="margin-top:4px">
         <h2> &nbsp;重点关注词</h2>
-        <div class="hint">
-          <span style="margin-right:14px">已完成周：<strong style="color:var(--text-sub)">WK17 (5/25–5/31)</strong></span>
-          <span style="margin-right:14px">未完成周：<strong style="color:var(--text-sub)">WK18 (6/1–6/3)</strong></span>
-          <span>加购率低于大盘均值 <span id="tm_avgLabel" style="color:var(--danger);font-weight:600">18.50%</span> 标红</span>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:12px;color:var(--text-sub)">数据周期</span>
+            <select class="select" id="tm_focusWeek" style="min-width:170px">
+              <option value="WK15">WK15 (5/11–5/17)</option>
+              <option value="WK16">WK16 (5/18–5/24)</option>
+              <option value="WK17" selected>WK17 (5/25–5/31)</option>
+              <option value="WK18">WK18 (6/1–6/7) 当周</option>
+            </select>
+          </div>
+          <span class="hint" id="tm_focusWeekHint" style="font-size:12px"></span>
+          <span class="hint" style="font-size:12px">加购率低于大盘均值 <span id="tm_avgLabel" style="color:var(--danger);font-weight:600">18.50%</span> 标红</span>
         </div>
       </div>
       <div class="focus-grid" id="tm_focusGrid"></div>
@@ -2001,12 +2009,14 @@
     // ============================================================
     //  PART 2 JS  (变量前缀 tm_)
     // ============================================================
+    // 统一暖色色阶：浅米黄 → 橙 → 红 → 深红。颜色越深 = 表现越差（凸显问题词）
+    var WARM_STOPS = [[255,247,219],[254,215,170],[251,146,60],[220,38,38],[127,29,29]];
     var COLOR_METRICS = {
-      cartRate:    { name:'加购率',     unit:'%', format:'pct',  good:'high', stops:[[220,252,231],[167,243,208],[34,197,94],[20,83,45]],     min:8,   max:35, tabColor:'#15803d' },
-      payRate:     { name:'支付率',     unit:'%', format:'pct',  good:'high', stops:[[219,234,254],[147,197,253],[59,130,246],[30,64,175]],   min:2,   max:15, tabColor:'#1d4ed8' },
-      uvValue:     { name:'UV价值',     unit:'元',format:'yuan', good:'high', stops:[[204,251,241],[94,234,212],[20,184,166],[4,78,71]],      min:0.5, max:5,  tabColor:'#0f766e' },
-      noResultRate:{ name:'无结果率',   unit:'%', format:'pct',  good:'low',  stops:[[220,252,231],[187,247,208],[254,240,138],[251,146,60],[185,28,28]], min:0, max:10, tabColor:'#b91c1c' },
-      absentRate:  { name:'曝光缺货率', unit:'%', format:'pct',  good:'low',  stops:[[220,252,231],[187,247,208],[254,240,138],[251,146,60],[154,52,18]],  min:0, max:8,  tabColor:'#c2410c' }
+      cartRate:    { name:'加购率',     unit:'%', format:'pct',  good:'high', stops:WARM_STOPS, min:8,   max:35, tabColor:'#b91c1c' },
+      payRate:     { name:'支付率',     unit:'%', format:'pct',  good:'high', stops:WARM_STOPS, min:2,   max:15, tabColor:'#b91c1c' },
+      uvValue:     { name:'UV价值',     unit:'元',format:'yuan', good:'high', stops:WARM_STOPS, min:0.5, max:5,  tabColor:'#b91c1c' },
+      noResultRate:{ name:'无结果率',   unit:'%', format:'pct',  good:'low',  stops:WARM_STOPS, min:0,   max:10, tabColor:'#b91c1c' },
+      absentRate:  { name:'曝光缺货率', unit:'%', format:'pct',  good:'low',  stops:WARM_STOPS, min:0,   max:8,  tabColor:'#b91c1c' }
     };
 
     var TERM_NAMES = [
@@ -2286,6 +2296,16 @@
     var AVG_PAY_RATE = 6.72;
     var AVG_CART_RATE = 18.5;
 
+    // 重点关注词：自然周筛选
+    var FOCUS_WEEKS = {
+      WK15: { range:'5/11–5/17', complete:true,  start:'2026-05-11', end:'2026-05-17' },
+      WK16: { range:'5/18–5/24', complete:true,  start:'2026-05-18', end:'2026-05-24' },
+      WK17: { range:'5/25–5/31', complete:true,  start:'2026-05-25', end:'2026-05-31' },
+      // 当周（今天=2026-06-02），未完成；数据范围 = 周一 至 昨天
+      WK18: { range:'6/1–6/7',   complete:false, start:'2026-06-01', end:'2026-06-01', actualEnd:'2026-06-01' }
+    };
+    var focusWeek = 'WK17';
+
     var FOCUS_CATS = [
       { id:'topWeek',    title:'本周TOP词',  desc:'本周搜索量最高',   color:'#1677ff', icon:'TOP' },
       { id:'surging',    title:'本周飙升词', desc:'环比增速最快',     color:'#fa8c16', icon:'飙升' },
@@ -2314,15 +2334,26 @@
       noResult:   { countBase: 5,   countStep: -0.4,payBase: 0,  payJitter: 0,  cartBase: 0,  cartJitter: 0  }
     };
 
+    function tmDayCount(startStr, endStr) {
+      var s = startStr.split('-'), e = endStr.split('-');
+      var sd = new Date(+s[0], +s[1]-1, +s[2]);
+      var ed = new Date(+e[0], +e[1]-1, +e[2]);
+      return Math.round((ed - sd) / 86400000) + 1;
+    }
+
     function tmGenFocusData() {
       var coef = tmFilterCoef();
+      var wkInfo = FOCUS_WEEKS[focusWeek] || FOCUS_WEEKS.WK17;
+      // 未完成周：实际数据天数 / 7，做线性缩放，避免数值与完整周不可比
+      var daysAvail = wkInfo.complete ? 7 : Math.max(1, tmDayCount(wkInfo.start, wkInfo.actualEnd));
+      var weekScale = daysAvail / 7;
       var result = {};
       FOCUS_CATS.forEach(function (cat) {
         var pool = FOCUS_POOL[cat.id];
         var prof = FOCUS_PROFILE[cat.id];
         result[cat.id] = pool.map(function (name, i) {
-          var seed = hashStr(cat.id + name + tmState.platform + tmState.region + tmState.dateRange);
-          var count  = (prof.countBase + prof.countStep * i) * (0.82 + rand(seed) * 0.36) * coef;
+          var seed = hashStr(cat.id + name + tmState.platform + tmState.region + focusWeek);
+          var count  = (prof.countBase + prof.countStep * i) * (0.82 + rand(seed) * 0.36) * coef * weekScale;
           var payRate = cat.id === 'noResult' ? 0
                       : Math.max(0, prof.payBase + (rand(seed+1) - 0.5) * prof.payJitter * 2);
           var cartRate = cat.id === 'noResult' ? 0
@@ -2366,6 +2397,18 @@
     }
 
     function tmRenderFocus() {
+      // hint：完整周显示完整周期，未完成周显示实际数据范围
+      var wkInfo = FOCUS_WEEKS[focusWeek] || FOCUS_WEEKS.WK17;
+      var hintEl = document.getElementById('tm_focusWeekHint');
+      if (hintEl) {
+        if (wkInfo.complete) {
+          hintEl.innerHTML = '<span style="color:var(--success);font-weight:500">●</span> 已完成周 · 数据周期 ' + wkInfo.range;
+        } else {
+          var rng = wkInfo.start.slice(5).replace('-','/') + ' ~ ' + wkInfo.actualEnd.slice(5).replace('-','/');
+          hintEl.innerHTML = '<span style="color:var(--warn);font-weight:500">●</span> 当周未完成 · 实际数据范围 ' + rng + '（自然周第一天 ~ 昨天）';
+        }
+      }
+
       var data = tmGenFocusData();
       var grid = document.getElementById('tm_focusGrid');
       if (!grid) return;
@@ -3178,6 +3221,10 @@
 
     tmBindFilters();
     tmBindColorTabs();
+    (function () {
+      var sel = document.getElementById('tm_focusWeek');
+      if (sel) sel.addEventListener('change', function () { focusWeek = sel.value; tmRenderFocus(); });
+    })();
     kwBindControls();
     kwSetupChartHover();
     kwSyncDatesFromTm();
