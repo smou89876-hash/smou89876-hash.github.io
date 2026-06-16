@@ -1,0 +1,3 @@
+# 原始数据与内部文档不发布到公网，仅发布 demo（index.html + data.json）
+*.xlsx
+*.pdf
