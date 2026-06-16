@@ -52,6 +52,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 .card-cmp{font-size:11px;margin-top:2px;display:inline-flex;align-items:center;gap:2px}
 .card-hr{height:1px;background:var(--border);margin:12px 0}
 .up{color:var(--green)}.dn{color:var(--red)}.fl{color:var(--muted)}
+.card-cmp.na{color:var(--muted2);cursor:help;font-size:10px}
 
 /* ── Toolbar ── */
 .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px}
@@ -322,33 +323,42 @@ function fmtVal(v,m){
 function periodUsers(row,dates){var s=0;dates.forEach(d=>{if(row.daily[d])s+=row.daily[d].u;});return s;}
 function periodCart(row,dates){var a=[];dates.forEach(d=>{if(row.daily[d])a.push(row.daily[d].c);});return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;}
 
-/* ── cards (同比 = 选择日期周 vs 对比日期周) ── */
+/* ── cards ──
+   词数量 = 所选周(T-7)按各组定义真实重新分类的词数（来自 count_by_date）。
+   同比 = 选择周 vs 对比周；仅当两个周对该组都有足够历史窗口时才计算，
+   否则标 N/A（长期/衰减/新词需 4 周历史，本数据集只够最新窗口）。 */
 function renderCards(){
   var el=document.getElementById('cardsEl');el.innerHTML='';
   var cur=periodDates(state.selDate), cmp=periodDates(state.cmpDate);
+  var cMap=D.meta.count_by_date, avail=D.meta.avail_by_date, MINW=D.meta.group_min_weeks;
   GROUP_ORDER.forEach(gk=>{
-    var g=D.groups[gk], cntC=0,cntP=0,cartC=[],cartP=[];
-    g.rows.forEach(r=>{
-      if(periodUsers(r,cur)>0)cntC++; if(periodUsers(r,cmp)>0)cntP++;
-      cur.forEach(d=>{if(r.daily[d])cartC.push(r.daily[d].c);});
-      cmp.forEach(d=>{if(r.daily[d])cartP.push(r.daily[d].c);});
-    });
+    var g=D.groups[gk], minw=MINW[gk];
+    var cntC=(cMap[state.selDate]||{})[gk]; if(cntC==null)cntC=g.rows.length;
+    var cntP=(cMap[state.cmpDate]||{})[gk];
+    var validSel=(avail[state.selDate]||0)>=minw, validCmp=(avail[state.cmpDate]||0)>=minw;
+    var canCmp=validSel&&validCmp&&cntP!=null;
+    // 平均加购率（按当前窗口成员的当周均值）
+    var cartC=[],cartP=[];
+    g.rows.forEach(r=>{cur.forEach(d=>{if(r.daily[d])cartC.push(r.daily[d].c);});cmp.forEach(d=>{if(r.daily[d])cartP.push(r.daily[d].c);});});
     var avgC=cartC.length?cartC.reduce((a,b)=>a+b,0)/cartC.length:0;
     var avgP=cartP.length?cartP.reduce((a,b)=>a+b,0)/cartP.length:0;
-    var dCnt=cntC-cntP, dCart=(avgC-avgP);
+    var dCnt=cntC-cntP, dCart=avgC-avgP;
+    var na='<span class="card-cmp na" title="长期增长/衰减/新词需回看4周历史，对比周历史不足，无法可信计算同比">同比 N/A · 历史不足</span>';
+    var cntCmp = canCmp ? `<span class="card-cmp ${dCnt>0?'up':dCnt<0?'dn':'fl'}">同比 ${dCnt>0?'+':''}${dCnt}</span>` : na;
+    var cartCmp = canCmp ? `<span class="card-cmp ${dCart>0?'up':dCart<0?'dn':'fl'}">同比 ${dCart>0?'+':''}${dCart.toFixed(2)}pt</span>` : na;
     var card=mk('div','card');
     card.innerHTML=`
       <div class="card-top"><span class="card-dot" style="background:${g.color}"></span><span class="card-name">${g.label}</span></div>
       <div class="card-row">
         <span class="card-val">${cntC}<span class="card-unit">个</span></span>
         <div class="card-sub">词数量</div>
-        <span class="card-cmp ${dCnt>0?'up':dCnt<0?'dn':'fl'}">同比 ${dCnt>0?'+':''}${dCnt}</span>
+        ${cntCmp}
       </div>
       <div class="card-hr"></div>
       <div class="card-row">
         <span class="card-val">${avgC.toFixed(1)}<span class="card-unit">%</span></span>
         <div class="card-sub">平均加购率</div>
-        <span class="card-cmp ${dCart>0?'up':dCart<0?'dn':'fl'}">同比 ${dCart>0?'+':''}${dCart.toFixed(2)}pt</span>
+        ${cartCmp}
       </div>`;
     el.appendChild(card);
   });
