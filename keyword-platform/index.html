@@ -3,529 +3,641 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Hyper 搜索 · 重点词库</title>
+<title>平台搜索 · 重点词库</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0f1117;--surface:#1a1d27;--surface2:#222535;--border:#2d3148;
-  --text:#e2e8f0;--muted:#64748b;--muted2:#94a3b8;
-  --blue:#3b82f6;--amber:#f59e0b;--green:#10b981;--purple:#8b5cf6;--red:#ef4444;--gray:#6b7280;
-  --font:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
-  --mono:'SF Mono','Fira Code',monospace;
+  --bg:#f0f2f5;--surface:#ffffff;--subtle:#f7f8fa;--border:#e9ebef;--border2:#e0e3e8;
+  --text:#1d2129;--text2:#4e5969;--muted:#86909c;--muted2:#a8b0bd;
+  --primary:#3a6ff7;--primary-soft:#eaf0ff;
+  --blue:#3a6ff7;--orange:#ff8b3d;--teal:#37c2a6;--purple:#9d7bf0;--rose:#f5576c;--gray:#86909c;
+  --red:#f5222d;--green:#00b42a;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --font:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;
+  --mono:'SF Mono','DIN Alternate','Roboto Mono',monospace;
 }
-body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;min-height:100vh}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;min-height:100vh;-webkit-font-smoothing:antialiased}
 
-/* ─── Header ─── */
-.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:200}
-.logo{font-size:15px;font-weight:700;letter-spacing:-.3px}.logo span{color:var(--blue)}
-.badge{background:rgba(59,130,246,.15);color:var(--blue);font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid rgba(59,130,246,.3);margin-left:10px}
-.hdr-right{display:flex;align-items:center;gap:16px}
-.filter-group{display:flex;align-items:center;gap:8px}
-.filter-label{font-size:11px;color:var(--muted)}
-.date-chip{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--text);font-size:12px;font-family:var(--mono)}
-.date-select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--text);font-size:12px;font-family:var(--mono);cursor:pointer;outline:none;transition:border-color .15s}
-.date-select:hover,.date-select:focus{border-color:var(--blue)}
-.date-select option{background:var(--surface);color:var(--text)}
-.vs{color:var(--muted);font-size:11px}
+/* ── Header ── */
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:200}
+.logo{font-size:16px;font-weight:700;letter-spacing:-.2px;color:var(--text)}.logo span{color:var(--primary)}
+.badge{background:var(--primary-soft);color:var(--primary);font-size:11px;padding:2px 9px;border-radius:4px;margin-left:10px;font-weight:500}
+.hdr-right{display:flex;align-items:center;gap:18px}
+.fg{display:flex;align-items:center;gap:8px}
+.fg-lbl{font-size:12px;color:var(--muted)}
+.date-select{background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:5px 10px;color:var(--text);font-size:12px;font-family:var(--mono);cursor:pointer;outline:none;transition:border-color .15s}
+.date-select:hover,.date-select:focus{border-color:var(--primary)}
+.vs{color:var(--muted2);font-size:11px}
+.qbtn{background:var(--primary);color:#fff;border:none;border-radius:5px;padding:7px 18px;font-size:13px;font-weight:500;font-family:var(--font);cursor:pointer;transition:background .15s}
+.qbtn:hover{background:#2b5fe0}
+.qbtn:active{background:#234fc0}
 
-/* ─── Main ─── */
-.main{padding:20px 24px;max-width:1500px;margin:0 auto}
-.sec-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px}
+/* ── Main ── */
+.main{padding:20px 24px;max-width:1520px;margin:0 auto}
+.sec-lbl{font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec-lbl::before{content:'';width:3px;height:13px;background:var(--primary);border-radius:2px}
 
-/* ─── Cards ─── */
-.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:28px}
+/* ── Cards ── */
+.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:28px}
 @media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative;overflow:hidden;cursor:pointer;transition:border-color .15s,box-shadow .15s}
-.card:hover{border-color:var(--cc);box-shadow:0 0 0 1px var(--cc)}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--cc)}
-.card-name{font-size:12px;font-weight:600;color:var(--cc);margin-bottom:10px}
-.card-row{margin-bottom:6px}
-.card-val{font-size:20px;font-weight:700;font-family:var(--mono)}
-.card-sub{font-size:11px;color:var(--muted);margin-top:1px}
-.card-cmp{font-size:11px;margin-top:3px;display:flex;align-items:center;gap:3px}
-.up{color:#10b981}.dn{color:#ef4444}.fl{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:box-shadow .15s,transform .15s}
+.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08);transform:translateY(-1px)}
+.card-top{display:flex;align-items:center;gap:7px;margin-bottom:14px}
+.card-dot{width:8px;height:8px;border-radius:50%}
+.card-name{font-size:13px;font-weight:600;color:var(--text)}
+.card-row{margin-bottom:4px}
+.card-val{font-size:24px;font-weight:700;font-family:var(--mono);color:var(--text);line-height:1.1}
+.card-unit{font-size:12px;color:var(--muted);font-weight:400;margin-left:3px}
+.card-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.card-cmp{font-size:11px;margin-top:2px;display:inline-flex;align-items:center;gap:2px}
+.card-hr{height:1px;background:var(--border);margin:12px 0}
+.up{color:var(--green)}.dn{color:var(--red)}.fl{color:var(--muted)}
 
-/* ─── Toolbar ─── */
-.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
-.tabs{display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:3px}
-.tab{padding:5px 14px;border-radius:5px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:12px;font-family:var(--font);transition:all .15s}
-.tab.on{background:var(--surface2);color:var(--text);font-weight:600}
-.metric-row{display:flex;align-items:center;gap:6px}
-.metric-lbl{font-size:11px;color:var(--muted)}
-.mbtn{padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:11px;font-family:var(--font);transition:all .15s}
-.mbtn.on{background:rgba(59,130,246,.15);border-color:var(--blue);color:var(--blue)}
-.gran-row{display:flex;align-items:center;gap:6px}
-.gran-lbl{font-size:11px;color:var(--muted)}
-.gbtn{padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:11px;font-family:var(--font);transition:all .15s}
-.gbtn.on{background:var(--surface2);color:var(--text);font-weight:600;border-color:var(--muted2)}
+/* ── Toolbar ── */
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px}
+.tb-left{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.tabs{display:flex;gap:2px;background:var(--subtle);border:1px solid var(--border);border-radius:6px;padding:3px}
+.tab{padding:5px 16px;border-radius:4px;border:none;background:none;color:var(--text2);cursor:pointer;font-size:12px;font-family:var(--font);transition:all .15s}
+.tab.on{background:var(--surface);color:var(--primary);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.seg-lbl{font-size:12px;color:var(--muted)}
+.seg{display:flex;gap:2px;background:var(--subtle);border:1px solid var(--border);border-radius:6px;padding:3px}
+.sbtn{padding:5px 12px;border-radius:4px;border:none;background:none;color:var(--text2);cursor:pointer;font-size:12px;font-family:var(--font);transition:all .15s}
+.sbtn.on{background:var(--surface);color:var(--text);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.metric-row{display:flex;align-items:center;gap:8px}
+.mbtns{display:flex;gap:6px;flex-wrap:wrap}
+.mbtn{padding:5px 11px;border-radius:5px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;font-size:12px;font-family:var(--font);transition:all .15s}
+.mbtn:hover{border-color:var(--primary)}
+.mbtn.on{background:var(--primary-soft);border-color:var(--primary);color:var(--primary);font-weight:500}
 
-/* ─── Group panel ─── */
-.gpanel{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
-.ghdr{padding:12px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+/* ── Group panel ── */
+.gpanel{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow)}
+.ghdr{padding:13px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;background:var(--surface)}
 .gdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.gname{font-size:13px;font-weight:700}
-.gcnt{font-size:11px;color:var(--muted);background:var(--surface2);padding:2px 7px;border-radius:20px}
-.gchev{margin-left:auto;color:var(--muted);font-size:11px;transition:transform .2s}
+.gname{font-size:14px;font-weight:600;color:var(--text)}
+.gcnt{font-size:11px;color:var(--text2);background:var(--subtle);padding:2px 8px;border-radius:10px;border:1px solid var(--border)}
+.gtag{font-size:11px;font-weight:600;border:1px solid;border-radius:4px;padding:1px 7px;white-space:nowrap}
+.gdesc{font-size:12px;color:var(--muted);margin-left:2px}
+.ginfo{margin-left:auto;font-size:12px;color:var(--primary);cursor:help;border:1px solid var(--border2);border-radius:4px;padding:2px 9px;background:var(--surface);white-space:nowrap}
+.ginfo:hover{background:var(--primary-soft);border-color:var(--primary)}
+.gchev{color:var(--muted);font-size:10px;margin-left:10px;transition:transform .2s}
+#gtip{position:fixed;display:none;z-index:500;width:348px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;box-shadow:0 8px 28px rgba(0,0,0,.16);padding:14px 16px;font-size:12px;line-height:1.55}
+.gtip-h{display:flex;align-items:center;gap:7px;font-weight:600;font-size:13px;color:var(--text);margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid var(--border)}
+.gtip-dot{width:8px;height:8px;border-radius:50%}
+.gtip-tag{margin-left:auto;font-size:11px;font-weight:600}
+.gtip-row{display:flex;gap:10px;margin-top:7px}
+.gtip-k{flex-shrink:0;width:30px;color:var(--muted);font-weight:600}
+.gtip-v{color:var(--text2);flex:1}
 .gpanel.collapsed .gchev{transform:rotate(-90deg)}
 .gpanel.collapsed .gbody{display:none}
 
-/* ─── Table ─── */
+/* ── Table ── */
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th{padding:8px 10px;text-align:right;color:var(--muted);font-weight:500;font-size:11px;background:var(--surface2);border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:52px}
+th{padding:9px 12px;text-align:right;color:var(--muted);font-weight:500;font-size:11px;background:var(--subtle);border-bottom:1px solid var(--border);white-space:nowrap}
 th.left,td.left{text-align:left}
 th:first-child,td:first-child{padding-left:18px}
-td{padding:8px 10px;border-bottom:1px solid rgba(45,49,72,.4);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap;color:var(--text)}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,.02)}
-.td-rank{color:var(--muted);font-family:var(--mono);width:36px;text-align:right}
-.td-kw{font-weight:500;max-width:140px;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+tbody tr:hover td{background:var(--subtle)}
+.td-rank{color:var(--muted);font-family:var(--mono);width:42px;text-align:right}
+.td-kw{font-weight:500;max-width:150px;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
 .td-kw.red{color:var(--red)}
-.td-chg{font-family:var(--mono);font-size:11px;text-align:center;min-width:52px}
-.chg-new{color:#10b981;background:rgba(16,185,129,.1);padding:1px 5px;border-radius:3px}
-.chg-up{color:#10b981}.chg-dn{color:#ef4444}.chg-fl{color:var(--muted)}
-.td-num{font-family:var(--mono);text-align:right;color:var(--muted2)}
+.td-num{font-family:var(--mono);text-align:right;color:var(--text2)}
 .td-num.cur{color:var(--text);font-weight:600}
-.td-num.null{color:var(--border)}
+.td-num.null{color:var(--muted2)}
 
-/* Slide nav */
-.slide-nav{display:flex;align-items:center;gap:6px;padding:8px 18px;border-top:1px solid var(--border);justify-content:flex-end}
-.snav-btn{padding:3px 8px;border:1px solid var(--border);background:none;color:var(--muted);border-radius:4px;cursor:pointer;font-size:11px}
-.snav-btn:hover{color:var(--text)}
-.snav-btn:disabled{opacity:.3;cursor:default}
-.snav-info{font-size:11px;color:var(--muted)}
+/* slide nav / pagination */
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.nav-grp{display:flex;align-items:center;gap:6px}
+.nbtn{padding:4px 10px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);border-radius:5px;cursor:pointer;font-size:11px;font-family:var(--font)}
+.nbtn:hover:not(:disabled){color:var(--primary);border-color:var(--primary)}
+.nbtn:disabled{opacity:.4;cursor:default}
+.foot-info{font-size:11px;color:var(--muted)}
 
-/* Pagination */
-.pg-bar{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:10px 18px;border-top:1px solid var(--border)}
-.pg-info{font-size:11px;color:var(--muted)}
-.pg-btn{padding:3px 9px;border:1px solid var(--border);background:none;color:var(--muted);border-radius:4px;cursor:pointer;font-size:11px}
-.pg-btn:hover{color:var(--text)}.pg-btn:disabled{opacity:.3;cursor:default}
-
-/* Trend */
-.trend-wrap{padding:16px}
-.trend-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-.tcard{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px}
-.tcard-kw{font-size:12px;font-weight:600;margin-bottom:10px}
+/* ── Trend ── */
+.trend-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);padding:18px}
+.trend-tools{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.kw-filter{position:relative;flex:1;min-width:260px}
+.kw-input-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;min-height:36px}
+.kw-input-row:focus-within{border-color:var(--primary)}
+.kw-chip{display:inline-flex;align-items:center;gap:5px;background:var(--subtle);border:1px solid var(--border);border-radius:4px;padding:2px 6px 2px 8px;font-size:12px}
+.kw-chip-dot{width:7px;height:7px;border-radius:50%}
+.kw-chip-grp{font-size:10px;color:var(--muted2);background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:0 4px;margin-left:2px}
+.kw-chip-x{cursor:pointer;color:var(--muted);font-size:13px;line-height:1}
+.kw-chip-x:hover{color:var(--red)}
+.kw-input{flex:1;min-width:120px;border:none;outline:none;font-size:12px;font-family:var(--font);background:none;color:var(--text);padding:3px}
+.kw-drop{position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:240px;overflow-y:auto;background:var(--surface);border:1px solid var(--border2);border-radius:6px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:50;display:none}
+.kw-drop.show{display:block}
+.kw-opt{padding:7px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px}
+.kw-opt:hover{background:var(--subtle)}
+.kw-opt-dot{width:7px;height:7px;border-radius:50%}
+.kw-opt-grp{margin-left:auto;font-size:10px;color:var(--muted2)}
+.kw-hint{font-size:11px;color:var(--muted);align-self:center}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:10px}
+.lg{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:default}
+.lg-line{width:14px;height:3px;border-radius:2px}
+.lg-grp{font-size:10px;color:var(--muted2);background:var(--subtle);border:1px solid var(--border);border-radius:3px;padding:0 4px}
+.chart-block{margin-top:8px}
+.chart-block+.chart-block{margin-top:18px;padding-top:18px;border-top:1px dashed var(--border)}
+.chart-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.chart-wrap{width:100%;overflow-x:auto}
+canvas.bigchart{display:block}
 </style>
 </head>
 <body>
 
 <header class="hdr">
   <div style="display:flex;align-items:center">
-    <div class="logo">hyper<span>搜索</span></div>
+    <div class="logo">平台<span>搜索</span></div>
     <span class="badge">重点词库</span>
   </div>
   <div class="hdr-right">
-    <div class="filter-group">
-      <span class="filter-label">选择日期（截止）</span>
-      <select class="date-select" id="curSelect"></select>
+    <div class="fg">
+      <span class="fg-lbl">选择日期（截止）</span>
+      <select class="date-select" id="selDate"></select>
       <span class="vs">过去一周</span>
     </div>
-    <div class="filter-group">
-      <span class="filter-label">对比日期（截止）</span>
-      <span class="date-chip" id="prevLabel">06/07</span>
-      <span class="vs">T-7</span>
+    <div class="fg">
+      <span class="fg-lbl">对比日期（截止）</span>
+      <select class="date-select" id="cmpDate"></select>
+      <span class="vs">同比</span>
     </div>
+    <button class="qbtn" id="queryBtn">查询</button>
   </div>
 </header>
 
 <main class="main">
-  <div class="sec-label">词组概览</div>
+  <div class="sec-lbl">词组概览</div>
   <div class="cards" id="cardsEl"></div>
 
-  <div class="sec-label">报表明细</div>
+  <div class="sec-lbl">报表明细</div>
   <div class="toolbar">
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <div class="tb-left">
       <div class="tabs">
-        <button class="tab on" onclick="setTab('table',this)">报表</button>
-        <button class="tab" onclick="setTab('trend',this)">趋势图</button>
+        <button class="tab on" data-tab="table" onclick="setTab('table',this)">报表</button>
+        <button class="tab" data-tab="trend" onclick="setTab('trend',this)">趋势图</button>
       </div>
-      <div class="gran-row">
-        <span class="gran-lbl">粒度</span>
-        <button class="gbtn on" onclick="setGran('day',this)">日</button>
-        <button class="gbtn" onclick="setGran('week',this)">周</button>
-        <button class="gbtn" onclick="setGran('month',this)">月</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="seg-lbl">粒度</span>
+        <div class="seg">
+          <button class="sbtn on" onclick="setGran('day',this)">日</button>
+          <button class="sbtn" onclick="setGran('week',this)">周</button>
+          <button class="sbtn" onclick="setGran('month',this)">月</button>
+        </div>
       </div>
     </div>
-    <div class="metric-row" id="metricRow">
-      <span class="metric-lbl">指标</span>
-      <button class="mbtn on" onclick="setMetric('u',this)">搜索人数</button>
-      <button class="mbtn" onclick="setMetric('t',this)">搜索次数</button>
-      <button class="mbtn" onclick="setMetric('c',this)">加购率</button>
-      <button class="mbtn" onclick="setMetric('p',this)">支付率</button>
-      <button class="mbtn" onclick="setMetric('n',this)">无结果率</button>
+    <div class="metric-row">
+      <span class="seg-lbl" id="metricLbl">指标</span>
+      <div class="mbtns" id="mbtns">
+        <button class="mbtn on" data-metric="u" onclick="setMetric('u')">搜索人数</button>
+        <button class="mbtn" data-metric="t" onclick="setMetric('t')">搜索次数</button>
+        <button class="mbtn" data-metric="c" onclick="setMetric('c')">加购率</button>
+        <button class="mbtn" data-metric="p" onclick="setMetric('p')">支付率</button>
+        <button class="mbtn" data-metric="n" onclick="setMetric('n')">无结果率</button>
+      </div>
     </div>
   </div>
-  <div id="panels"></div>
+  <div id="content"></div>
 </main>
 
 <script>
-var D = null;
-var state = {tab:'table', metric:'u', gran:'day', colOffset:{}, endDate:null};
-var PAGE = 20;
-var pageNow = {};
-var GROUP_ORDER = ['top','surge','long_growth','new','decay','noresult'];
+var D=null;
+var state={tab:'table',metric:'u',trendMetrics:['u'],gran:'day',selDate:null,cmpDate:null,colOffset:{},trendKws:[]};
+var PAGE=20, pageNow={};
+var GROUP_ORDER=['top','surge','long_growth','new','decay','noresult'];
+var METRIC_NAME={u:'搜索人数',t:'搜索次数',c:'加购率',p:'支付率',n:'无结果率'};
+// 每组词：tag=运营动作；desc=大白话；rule=精确口径；value=为什么重要
+var GROUP_META={
+  top:{tag:'守大盘',desc:'搜索人数最高的头部词',
+    rule:'日均搜索人数排名前 80 的搜索词',
+    value:'守住基本盘——保障头部供给与体验，防止主力流量流失'},
+  surge:{tag:'抓增量',desc:'短期内突然放量的词',
+    rule:'日均搜索人数 ≥300，且搜索次数较上周同期环比增长 ≥15%',
+    value:'抓增量 / 抓热点——及时备货、加权曝光、争取 PR 资源'},
+  long_growth:{tag:'重点培育',desc:'持续稳定上涨的潜力词',
+    rule:'近 4 周中 ≥3 周搜索人数环比为正，4 周复合周增速 ≥15%，当前周日均 ≥50',
+    value:'长期商业价值——稳健增长的潜力品类，值得持续投入'},
+  new:{tag:'探新需求',desc:'最近才冒出来的新词',
+    rule:'当前周日均搜索人数 ≥50，但过去 30 天日均 <10（含此前从未出现）',
+    value:'发现用户新偏好与新供给机会——快速补品、建词、卡位'},
+  decay:{tag:'防流失',desc:'持续走低的下滑词',
+    rule:'起始周日均搜索人数 ≥100，近 4 周中 ≥3 周搜索人数环比为负，累计跌幅 ≥20%',
+    value:'提前发现下降品类——排查体验/供给问题，规避流量风险'},
+  noresult:{tag:'补供给',desc:'搜了却没结果的词',
+    rule:'搜索无结果率 ＞50% 的搜索词',
+    value:'召回硬伤——补齐供给或同义词映射，“修了就有”的确定性增量'},
+};
+var SERIES_PALETTE=['#3a6ff7','#ff8b3d','#37c2a6','#9d7bf0','#f5576c','#00b42a','#f7b500','#7d52ec'];
 
 fetch('data.json').then(r=>r.json()).then(data=>{
-  D = data;
-  state.endDate = D.meta.all_dates[D.meta.all_dates.length-1];
-  GROUP_ORDER.forEach(k=>{ state.colOffset[k]=0; pageNow[k]=1; });
-  init();
+  D=data;
+  var dts=D.meta.all_dates;
+  state.selDate=dts[dts.length-1];
+  state.cmpDate=cmpDefault(state.selDate);
+  GROUP_ORDER.forEach(k=>{state.colOffset[k]=0;pageNow[k]=1;});
+  buildDateFilters();
+  renderCards();
+  renderContent();
 });
 
-function init(){
-  buildDateFilter();
-  renderCards();
-  renderPanels();
+/* ── date helpers ── */
+function shiftDays(d,n){return new Date(new Date(d+'T00:00:00Z').getTime()+n*86400000).toISOString().slice(0,10);}
+function short(d){return d.slice(5).replace('-','/');}
+function cmpDefault(sel){
+  var t=shiftDays(sel,-7);
+  var cands=D.meta.all_dates.filter(d=>d<=t);
+  return cands.length?cands[cands.length-1]:D.meta.all_dates[0];
+}
+function periodDates(cutoff){
+  var lo=shiftDays(cutoff,-6);
+  return D.meta.all_dates.filter(d=>d>=lo&&d<=cutoff);
 }
 
-// ─── Global date filter ───
-function buildDateFilter(){
-  var sel = document.getElementById('curSelect');
-  sel.innerHTML='';
+function buildDateFilters(){
+  var s=document.getElementById('selDate'), c=document.getElementById('cmpDate');
+  s.innerHTML='';c.innerHTML='';
   D.meta.all_dates.forEach(d=>{
-    var o=document.createElement('option');
-    o.value=d; o.textContent=d.slice(5).replace('-','/');
-    sel.appendChild(o);
+    var o1=document.createElement('option');o1.value=d;o1.textContent=short(d);s.appendChild(o1);
+    var o2=document.createElement('option');o2.value=d;o2.textContent=short(d);c.appendChild(o2);
   });
-  sel.value=state.endDate;
-  sel.onchange=()=>{
-    state.endDate=sel.value;
-    GROUP_ORDER.forEach(k=>{ state.colOffset[k]=0; });
-    updateCompareLabel();
-    GROUP_ORDER.forEach(rerenderGroup);
+  s.value=state.selDate; c.value=state.cmpDate;
+  // 改日期不立即生效：仅更新待查询值；点「查询」才重算
+  s.onchange=()=>{ c.value=cmpDefault(s.value); };  // 同比默认回到 T-7
+  document.getElementById('queryBtn').onclick=()=>{
+    state.selDate=s.value; state.cmpDate=c.value;
+    GROUP_ORDER.forEach(k=>{state.colOffset[k]=0;});
+    renderCards(); renderContent();
   };
-  updateCompareLabel();
-}
-function updateCompareLabel(){
-  var t=new Date(state.endDate).getTime()-7*86400000;
-  document.getElementById('prevLabel').textContent=new Date(t).toISOString().slice(0,10).slice(5).replace('-','/');
 }
 
-// ─── Date helpers ───
-function allDates(){ return D.meta.all_dates; }
-
-// Normalized columns: always [{label, dates:[...], end}]
-function getColDates(gran, endDate){
-  var dates = allDates();
-  if(gran==='day'){
-    return dates.map(d=>({label:d.slice(5).replace('-','/'), dates:[d], end:d}));
-  }
+/* ── columns (normalized {label,dates,end}) ── */
+function getColDates(gran,endDate){
+  var dates=D.meta.all_dates;
+  if(gran==='day') return dates.map(d=>({label:short(d),dates:[d],end:d}));
   if(gran==='week'){
-    // 7-day bins anchored at endDate, walking backwards (PRD: T-7 为一周，依次往前数)
-    var dayMs=86400000, bins=[];
-    var firstMs=new Date(dates[0]).getTime();
-    var ptr=new Date(endDate).getTime();
+    var dayMs=86400000,bins=[],firstMs=new Date(dates[0]).getTime(),ptr=new Date(endDate).getTime();
     while(ptr>=firstMs){
-      var binEnd=new Date(ptr).toISOString().slice(0,10);
-      var binStart=new Date(ptr-6*dayMs).toISOString().slice(0,10);
-      var bd=dates.filter(d=>d>=binStart&&d<=binEnd);
-      if(bd.length) bins.unshift({label:fmtWeek(binStart,binEnd), dates:bd, end:binEnd});
+      var be=new Date(ptr).toISOString().slice(0,10), bs=new Date(ptr-6*dayMs).toISOString().slice(0,10);
+      var bd=dates.filter(d=>d>=bs&&d<=be);
+      if(bd.length) bins.unshift({label:short(bs)+'~'+short(be),dates:bd,end:be});
       ptr-=7*dayMs;
     }
     return bins;
   }
-  if(gran==='month'){
-    var months={};
-    dates.forEach(d=>{
-      var m=d.slice(0,7);
-      if(!months[m]) months[m]={label:fmtMonth(m),dates:[],end:d};
-      months[m].dates.push(d); months[m].end=d;
-    });
-    return Object.values(months);
-  }
+  var months={};
+  dates.forEach(d=>{var m=d.slice(0,7);if(!months[m])months[m]={label:parseInt(m.slice(5))+'月',dates:[],end:d};months[m].dates.push(d);months[m].end=d;});
+  return Object.values(months);
 }
-
-function fmtWeek(s,e){
-  return s.slice(5).replace('-','/')+' – '+e.slice(5).replace('-','/');
-}
-function fmtMonth(m){
-  var parts=m.split('-'); return parseInt(parts[1])+'月';
-}
-
-// Index of the column containing (or just before) endDate
-function findEndIdx(cols, endDate){
-  for(var i=cols.length-1;i>=0;i--){
-    if(cols[i].dates.indexOf(endDate)>=0) return i;
-    if(cols[i].end<=endDate) return i;
-  }
+function findEndIdx(cols,endDate){
+  for(var i=cols.length-1;i>=0;i--){ if(cols[i].dates.indexOf(endDate)>=0) return i; if(cols[i].end<=endDate) return i; }
   return cols.length-1;
 }
-
-function getColsForGroup(gk, gran){
-  var cols = getColDates(gran, state.endDate);
-  var endIdx = findEndIdx(cols, state.endDate);
-  var WINDOW = 8;
-  var off = state.colOffset[gk]||0;
-  var end = Math.max(1, endIdx + 1 - off);
-  var start = Math.max(0, end - WINDOW);
-  return {cols: cols.slice(start, end), canBack: start>0, canFwd: off>0};
+function getColsForGroup(gk){
+  var cols=getColDates(state.gran,state.selDate);
+  var endIdx=findEndIdx(cols,state.selDate), WINDOW=8, off=state.colOffset[gk]||0;
+  var end=Math.max(1,endIdx+1-off), start=Math.max(0,end-WINDOW);
+  return {cols:cols.slice(start,end),canBack:start>0,canFwd:off>0};
 }
+function slideCol(gk,dir){state.colOffset[gk]=Math.max(0,(state.colOffset[gk]||0)+dir);rerenderGroup(gk);}
 
-function slideCol(gk, dir){
-  // dir: +1 = back in time, -1 = forward
-  state.colOffset[gk] = Math.max(0, (state.colOffset[gk]||0) + dir);
-  rerenderGroup(gk);
-}
-
-function getVal(kw, dates, metric){
-  var row = findRow(kw);
-  if(!row) return null;
-  var pts = dates.map(d=> row.daily[d] ? row.daily[d][metric] : null).filter(v=>v!==null);
-  if(!pts.length) return null;
-  // 搜索人数/次数取日均；比率类取均值
-  if(metric==='u'||metric==='t') return pts.reduce((a,b)=>a+b,0)/dates.length;
-  return pts.reduce((a,b)=>a+b,0)/pts.length;
-}
-
-var _rowCache = {};
+/* ── value access ── */
+var _row={};
 function findRow(kw){
-  if(_rowCache[kw]) return _rowCache[kw];
-  for(var gk of GROUP_ORDER){
-    var found = D.groups[gk].rows.find(r=>r.kw===kw);
-    if(found){ _rowCache[kw]=found; return found; }
-  }
+  if(_row[kw]) return _row[kw];
+  for(var gk of GROUP_ORDER){var f=D.groups[gk].rows.find(r=>r.kw===kw); if(f){_row[kw]=f;return f;}}
   return null;
 }
+function getVal(row,dates,metric){
+  var pts=dates.map(d=>row.daily[d]?row.daily[d][metric]:null).filter(v=>v!==null);
+  if(!pts.length) return null;
+  if(metric==='u'||metric==='t') return pts.reduce((a,b)=>a+b,0)/dates.length; // 日均
+  return pts.reduce((a,b)=>a+b,0)/pts.length;                                   // 比率均值
+}
+function fmtVal(v,m){
+  if(v===null||v===undefined) return '—';
+  if(m==='u'||m==='t') return Math.round(v).toLocaleString('zh-CN');
+  return v.toFixed(2)+'%';
+}
+// 当期周均（人数/加购率），用于排序、卡片、红色高亮
+function periodUsers(row,dates){var s=0;dates.forEach(d=>{if(row.daily[d])s+=row.daily[d].u;});return s;}
+function periodCart(row,dates){var a=[];dates.forEach(d=>{if(row.daily[d])a.push(row.daily[d].c);});return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;}
 
-// ─── Cards ───
+/* ── cards (同比 = 选择日期周 vs 对比日期周) ── */
 function renderCards(){
-  var el = document.getElementById('cardsEl');
-  el.innerHTML='';
+  var el=document.getElementById('cardsEl');el.innerHTML='';
+  var cur=periodDates(state.selDate), cmp=periodDates(state.cmpDate);
   GROUP_ORDER.forEach(gk=>{
-    var g = D.groups[gk];
-    var cntDiff = g.count - g.count_prev;
-    var cartDiff = (g.avg_cart - g.avg_cart_prev).toFixed(2);
-    var cc = g.color;
-    var card = mk('div','card');
-    card.style.setProperty('--cc', cc);
-    card.innerHTML = `
-      <div class="card-name">${g.label}</div>
+    var g=D.groups[gk], cntC=0,cntP=0,cartC=[],cartP=[];
+    g.rows.forEach(r=>{
+      if(periodUsers(r,cur)>0)cntC++; if(periodUsers(r,cmp)>0)cntP++;
+      cur.forEach(d=>{if(r.daily[d])cartC.push(r.daily[d].c);});
+      cmp.forEach(d=>{if(r.daily[d])cartP.push(r.daily[d].c);});
+    });
+    var avgC=cartC.length?cartC.reduce((a,b)=>a+b,0)/cartC.length:0;
+    var avgP=cartP.length?cartP.reduce((a,b)=>a+b,0)/cartP.length:0;
+    var dCnt=cntC-cntP, dCart=(avgC-avgP);
+    var card=mk('div','card');
+    card.innerHTML=`
+      <div class="card-top"><span class="card-dot" style="background:${g.color}"></span><span class="card-name">${g.label}</span></div>
       <div class="card-row">
-        <div class="card-val">${g.count}</div>
+        <span class="card-val">${cntC}<span class="card-unit">个</span></span>
         <div class="card-sub">词数量</div>
-        <div class="card-cmp ${cntDiff>0?'up':cntDiff<0?'dn':'fl'}">
-          ${cntDiff>0?'↑':cntDiff<0?'↓':'—'}${Math.abs(cntDiff)} vs 上周
-        </div>
+        <span class="card-cmp ${dCnt>0?'up':dCnt<0?'dn':'fl'}">同比 ${dCnt>0?'+':''}${dCnt}</span>
       </div>
-      <div class="card-row" style="margin-top:8px">
-        <div class="card-val">${g.avg_cart}%</div>
+      <div class="card-hr"></div>
+      <div class="card-row">
+        <span class="card-val">${avgC.toFixed(1)}<span class="card-unit">%</span></span>
         <div class="card-sub">平均加购率</div>
-        <div class="card-cmp ${cartDiff>0?'up':cartDiff<0?'dn':'fl'}">
-          ${cartDiff>0?'↑':cartDiff<0?'↓':'—'}${Math.abs(cartDiff)}% vs 上周
-        </div>
+        <span class="card-cmp ${dCart>0?'up':dCart<0?'dn':'fl'}">同比 ${dCart>0?'+':''}${dCart.toFixed(2)}pt</span>
       </div>`;
     el.appendChild(card);
   });
 }
 
-// ─── Panels ───
-function setTab(t,btn){ state.tab=t; toggleActive(btn,'tab'); renderPanels(); }
-function setMetric(m,btn){ state.metric=m; toggleActive(btn,'mbtn'); GROUP_ORDER.forEach(rerenderGroup); }
-function setGran(g,btn){ state.gran=g; toggleActive(btn,'gbtn'); GROUP_ORDER.forEach(k=>{ state.colOffset[k]=0; }); GROUP_ORDER.forEach(rerenderGroup); }
+/* ── toolbar ── */
+function setTab(t,btn){state.tab=t;flip(btn,'tab');syncMetricUI();renderContent();}
+function setGran(g,btn){state.gran=g;flip(btn,'sbtn');GROUP_ORDER.forEach(k=>{state.colOffset[k]=0;});renderContent();}
+function flip(btn,cls){var p=btn.parentNode;p.querySelectorAll('.'+cls).forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
 
-function toggleActive(btn,cls){
-  document.querySelectorAll('.'+cls).forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
+// 报表页：指标单选；趋势页：指标多选
+function setMetric(m){
+  if(state.tab==='table'){ state.metric=m; }
+  else {
+    var i=state.trendMetrics.indexOf(m);
+    if(i>=0){ if(state.trendMetrics.length>1) state.trendMetrics.splice(i,1); }  // 至少保留一个
+    else state.trendMetrics.push(m);
+  }
+  syncMetricUI(); renderContent();
+}
+function syncMetricUI(){
+  var multi=state.tab==='trend';
+  document.getElementById('metricLbl').textContent = multi?'指标（可多选）':'指标';
+  document.querySelectorAll('#mbtns .mbtn').forEach(b=>{
+    var m=b.dataset.metric;
+    var on = multi ? state.trendMetrics.indexOf(m)>=0 : state.metric===m;
+    b.classList.toggle('on',on);
+  });
 }
 
-function renderPanels(){
-  var el = document.getElementById('panels');
-  el.innerHTML='';
-  GROUP_ORDER.forEach(gk=>{ el.appendChild(buildPanel(gk)); });
+function renderContent(){
+  var c=document.getElementById('content');c.innerHTML='';
+  if(state.tab==='table'){ GROUP_ORDER.forEach(gk=>c.appendChild(buildPanel(gk))); }
+  else { c.appendChild(buildTrend()); }
 }
 
-function rerenderGroup(gk){
-  var old = document.getElementById('gp-'+gk);
-  if(!old) return;
-  var fresh = buildPanel(gk);
-  old.parentNode.replaceChild(fresh, old);
-}
-
+/* ── table panels ── */
 function buildPanel(gk){
-  var g = D.groups[gk];
-  var panel = mk('div','gpanel');
-  panel.id = 'gp-'+gk;
-
-  var hdr = mk('div','ghdr');
-  hdr.innerHTML = `<div class="gdot" style="background:${g.color}"></div>
-    <div class="gname">${g.label}</div>
-    <div class="gcnt">${g.count} 词</div>
-    <div class="gchev">▼</div>`;
-  hdr.onclick = ()=>panel.classList.toggle('collapsed');
-
-  var body = mk('div','gbody');
-  body.appendChild(state.tab==='table' ? buildTable(gk) : buildTrend(gk));
-
-  panel.appendChild(hdr);
-  panel.appendChild(body);
-  return panel;
+  var g=D.groups[gk], meta=GROUP_META[gk], panel=mk('div','gpanel');panel.id='gp-'+gk;
+  var hdr=mk('div','ghdr');
+  hdr.innerHTML=`<span class="gdot" style="background:${g.color}"></span>
+    <span class="gname">${g.label}</span>
+    <span class="gtag" style="color:${g.color};border-color:${g.color}40;background:${g.color}14">${meta.tag}</span>
+    <span class="gdesc">${meta.desc}</span>
+    <span class="gcnt">${g.rows.length} 词</span>
+    <span class="ginfo">ⓘ 定义</span>
+    <span class="gchev">▼</span>`;
+  hdr.onclick=(e)=>{ if(e.target.closest('.ginfo'))return; panel.classList.toggle('collapsed'); };
+  var info=hdr.querySelector('.ginfo');
+  info.onmouseenter=()=>showTip(gk,info.getBoundingClientRect());
+  info.onmouseleave=hideTip;
+  var body=mk('div','gbody'); body.appendChild(buildTable(gk));
+  panel.appendChild(hdr);panel.appendChild(body);return panel;
 }
 
-var METRIC_FMT = {u:'搜索人数',t:'搜索次数',c:'加购率%',p:'支付率%',n:'无结果率%'};
+var tipEl=null;
+function showTip(gk,rect){
+  var meta=GROUP_META[gk], g=D.groups[gk];
+  if(!tipEl){tipEl=mk('div');tipEl.id='gtip';document.body.appendChild(tipEl);}
+  tipEl.innerHTML=`<div class="gtip-h"><span class="gtip-dot" style="background:${g.color}"></span>${g.label}<span class="gtip-tag" style="color:${g.color}">${meta.tag}</span></div>
+    <div class="gtip-row"><span class="gtip-k">定义</span><span class="gtip-v">${meta.rule}</span></div>
+    <div class="gtip-row"><span class="gtip-k">排序</span><span class="gtip-v">按当期日均搜索人数降序</span></div>
+    <div class="gtip-row"><span class="gtip-k">高亮</span><span class="gtip-v">关键词标红 = 加购率低于大盘（${D.meta.benchmark_cart}%）</span></div>
+    <div class="gtip-row"><span class="gtip-k">价值</span><span class="gtip-v">${meta.value}</span></div>`;
+  tipEl.style.display='block';
+  var tw=348, left=rect.left, top=rect.bottom+8;
+  if(left+tw>window.innerWidth-16) left=window.innerWidth-16-tw;
+  tipEl.style.left=Math.max(16,left)+'px'; tipEl.style.top=top+'px';
+}
+function hideTip(){ if(tipEl) tipEl.style.display='none'; }
+function rerenderGroup(gk){var o=document.getElementById('gp-'+gk);if(o)o.parentNode.replaceChild(buildPanel(gk),o);}
 
 function buildTable(gk){
-  var g = D.groups[gk];
-  var {cols, canBack, canFwd} = getColsForGroup(gk, state.gran);
-  var m = state.metric;
-  var pg = pageNow[gk]||1;
-  var rows = g.rows;
-  var total = rows.length;
-  var pgRows = rows.slice((pg-1)*PAGE, pg*PAGE);
+  var g=D.groups[gk], m=state.metric;
+  var {cols,canBack,canFwd}=getColsForGroup(gk);
+  var cur=periodDates(state.selDate), bench=D.meta.benchmark_cart;
+  // 排序：当期周均搜索人数降序
+  var sorted=g.rows.slice().sort((a,b)=>periodUsers(b,cur)-periodUsers(a,cur));
+  var pg=pageNow[gk]||1, total=sorted.length, totalPg=Math.ceil(total/PAGE);
+  var pgRows=sorted.slice((pg-1)*PAGE,pg*PAGE);
 
-  var wrap = mk('div');
-  var tw = mk('div','tbl-wrap');
-  var tbl = mk('table');
+  var wrap=mk('div'), tw=mk('div','tbl-wrap'), tbl=mk('table');
+  var thead=mk('thead'),hr=mk('tr');
+  ['排名','关键词'].forEach((h,i)=>{var th=mk('th','left');th.textContent=h;if(i===0)th.style.width='42px';hr.appendChild(th);});
+  cols.forEach(col=>{var th=mk('th');th.textContent=col.label+' '+METRIC_NAME[m];hr.appendChild(th);});
+  thead.appendChild(hr);tbl.appendChild(thead);
 
-  // header
-  var thead = mk('thead'), hr = mk('tr');
-  ['排名','关键词'].forEach((h,i)=>{
-    var th = mk('th'); th.textContent=h; th.classList.add('left');
-    if(i===0) th.style.width='40px';
-    hr.appendChild(th);
-  });
-  cols.forEach(col=>{
-    var th = mk('th'); th.textContent = col.label + ' ' + METRIC_FMT[m];
-    hr.appendChild(th);
-  });
-  thead.appendChild(hr); tbl.appendChild(thead);
-
-  var tbody = mk('tbody');
-  pgRows.forEach(row=>{
-    var tr = mk('tr');
-
-    var td1=mk('td','td-rank left'); td1.textContent=row.rank; tr.appendChild(td1);
-
-    var td3=mk('td','td-kw left');
-    if(row.red) td3.classList.add('red');
-    td3.textContent=row.kw;
-    td3.title=(row.red?row.kw+'（加购率低于大盘）':row.kw);
-    tr.appendChild(td3);
-
+  var tb=mk('tbody');
+  pgRows.forEach((row,idx)=>{
+    var tr=mk('tr');
+    var rk=(pg-1)*PAGE+idx+1;
+    var t1=mk('td','td-rank left');t1.textContent=rk;tr.appendChild(t1);
+    var t2=mk('td','td-kw left');
+    var pc=periodCart(row,cur), red=(pc!==null&&pc<bench);
+    if(red)t2.classList.add('red');
+    t2.textContent=row.kw; t2.title=red?row.kw+'（加购率低于大盘 '+bench+'%）':row.kw;
+    tr.appendChild(t2);
     cols.forEach((col,ci)=>{
-      var td=mk('td','td-num');
-      if(ci===cols.length-1) td.classList.add('cur');
-      var val=getVal(row.kw, col.dates, m);
-      if(val===null){td.classList.add('null');td.textContent='—';}
-      else{
-        if(m==='u'||m==='t') td.textContent=Math.round(val).toLocaleString('zh-CN');
-        else td.textContent=val.toFixed(2)+'%';
-      }
+      var td=mk('td','td-num');if(ci===cols.length-1)td.classList.add('cur');
+      var v=getVal(row,col.dates,m);
+      if(v===null){td.classList.add('null');td.textContent='—';} else td.textContent=fmtVal(v,m);
       tr.appendChild(td);
     });
-
-    tbody.appendChild(tr);
+    tb.appendChild(tr);
   });
-  tbl.appendChild(tbody);
-  tw.appendChild(tbl);
-  wrap.appendChild(tw);
+  tbl.appendChild(tb);tw.appendChild(tbl);wrap.appendChild(tw);
 
-  // slide nav
-  var nav = mk('div','slide-nav');
-  var bkBtn = mk('button','snav-btn'); bkBtn.textContent='◀ 更早'; bkBtn.disabled=!canBack;
-  bkBtn.onclick=()=>slideCol(gk,1);
-  var fwBtn = mk('button','snav-btn'); fwBtn.textContent='更近 ▶'; fwBtn.disabled=!canFwd;
-  fwBtn.onclick=()=>slideCol(gk,-1);
-  var info = mk('span','snav-info'); info.textContent='显示 '+cols.length+' 列';
-  nav.appendChild(bkBtn); nav.appendChild(info); nav.appendChild(fwBtn);
-  wrap.appendChild(nav);
-
-  // pagination
+  // footer: slide + pagination
+  var foot=mk('div','foot');
+  var navL=mk('div','nav-grp');
+  var bk=mk('button','nbtn');bk.textContent='◀ 更早';bk.disabled=!canBack;bk.onclick=()=>slideCol(gk,1);
+  var fw=mk('button','nbtn');fw.textContent='更近 ▶';fw.disabled=!canFwd;fw.onclick=()=>slideCol(gk,-1);
+  var si=mk('span','foot-info');si.textContent='共 '+cols.length+' 列';
+  navL.appendChild(bk);navL.appendChild(si);navL.appendChild(fw);
+  foot.appendChild(navL);
+  var navR=mk('div','nav-grp');
   if(total>PAGE){
-    var pg_bar=mk('div','pg-bar');
-    var totalPg=Math.ceil(total/PAGE);
-    var pi=mk('span','pg-info'); pi.textContent=`${total} 词，第 ${pg}/${totalPg} 页`;
-    var pb=mk('button','pg-btn'); pb.textContent='上一页'; pb.disabled=pg<=1;
-    pb.onclick=()=>{pageNow[gk]=pg-1;rerenderGroup(gk);};
-    var nb=mk('button','pg-btn'); nb.textContent='下一页'; nb.disabled=pg>=totalPg;
-    nb.onclick=()=>{pageNow[gk]=pg+1;rerenderGroup(gk);};
-    pg_bar.appendChild(pi); pg_bar.appendChild(pb); pg_bar.appendChild(nb);
-    wrap.appendChild(pg_bar);
+    var pi=mk('span','foot-info');pi.textContent=`${total} 词 · 第 ${pg}/${totalPg} 页`;
+    var pb=mk('button','nbtn');pb.textContent='上一页';pb.disabled=pg<=1;pb.onclick=()=>{pageNow[gk]=pg-1;rerenderGroup(gk);};
+    var nb=mk('button','nbtn');nb.textContent='下一页';nb.disabled=pg>=totalPg;nb.onclick=()=>{pageNow[gk]=pg+1;rerenderGroup(gk);};
+    navR.appendChild(pi);navR.appendChild(pb);navR.appendChild(nb);
+  } else { var pi2=mk('span','foot-info');pi2.textContent=total+' 词';navR.appendChild(pi2); }
+  foot.appendChild(navR);
+  wrap.appendChild(foot);
+  return wrap;
+}
+
+/* ── trend ── */
+function trendCols(){
+  var cols=getColDates(state.gran,state.selDate);
+  var endIdx=findEndIdx(cols,state.selDate);
+  var maxN=state.gran==='day'?14:cols.length;
+  var start=Math.max(0,endIdx+1-maxN);
+  return cols.slice(start,endIdx+1);
+}
+function groupsOf(kw){
+  return GROUP_ORDER.filter(gk=>D.groups[gk].rows.some(r=>r.kw===kw))
+    .map(gk=>({gk:gk,label:D.groups[gk].label,color:D.groups[gk].color}));
+}
+function uniqMembers(){
+  var seen={},out=[];
+  GROUP_ORDER.forEach(gk=>D.groups[gk].rows.forEach(r=>{
+    if(!seen[r.kw]){seen[r.kw]=1;var gs=groupsOf(r.kw);out.push({kw:r.kw,groups:gs,color:gs[0].color});}
+  }));
+  return out;
+}
+function groupAvg(rows,dates,metric){
+  var vs=rows.map(r=>getVal(r,dates,metric)).filter(v=>v!==null);
+  return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;
+}
+function buildTrend(){
+  var box=mk('div','trend-box');
+  // filter row
+  var tools=mk('div','trend-tools');
+  var filt=mk('div','kw-filter');
+  var inrow=mk('div','kw-input-row');inrow.id='kwInRow';
+  renderChips(inrow);
+  var inp=mk('input','kw-input');inp.id='kwInput';inp.placeholder=state.trendKws.length?'继续添加关键词…':'搜索关键词以对比（默认展示六词组均值）';
+  inrow.appendChild(inp);
+  var drop=mk('div','kw-drop');drop.id='kwDrop';
+  filt.appendChild(inrow);filt.appendChild(drop);
+  tools.appendChild(filt);
+  var hint=mk('span','kw-hint');
+  hint.textContent=state.trendKws.length?('已选 '+state.trendKws.length+' 词'):('指标：'+METRIC_NAME[state.metric]);
+  tools.appendChild(hint);
+  box.appendChild(tools);
+
+  var legend=mk('div','legend');legend.id='legend';box.appendChild(legend);
+  var charts=mk('div');charts.id='charts';box.appendChild(charts);
+
+  setTimeout(()=>{ wireKwFilter(); drawTrend(); },0);
+  return box;
+}
+function renderChips(inrow){
+  // clear existing chips (keep input if present)
+  Array.from(inrow.querySelectorAll('.kw-chip')).forEach(c=>c.remove());
+  var inp=inrow.querySelector('.kw-input');
+  state.trendKws.forEach(kw=>{
+    var gs=groupsOf(kw);
+    var chip=mk('span','kw-chip');
+    var grpTxt=gs.map(g=>g.label).join('/');
+    chip.innerHTML=`<span class="kw-chip-dot" style="background:${gs.length?gs[0].color:'#888'}"></span>${kw}<span class="kw-chip-grp">${grpTxt}</span><span class="kw-chip-x">×</span>`;
+    chip.querySelector('.kw-chip-x').onclick=()=>{state.trendKws=state.trendKws.filter(k=>k!==kw);renderContent();};
+    if(inp) inrow.insertBefore(chip,inp); else inrow.appendChild(chip);
+  });
+}
+function wireKwFilter(){
+  var inp=document.getElementById('kwInput'), drop=document.getElementById('kwDrop');
+  if(!inp) return;
+  var members=uniqMembers();
+  function show(q){
+    q=(q||'').trim();
+    var list=members.filter(m=>!state.trendKws.includes(m.kw) && (!q||m.kw.indexOf(q)>=0)).slice(0,40);
+    drop.innerHTML='';
+    if(!list.length){drop.classList.remove('show');return;}
+    list.forEach(m=>{
+      var o=mk('div','kw-opt');
+      o.innerHTML=`<span class="kw-opt-dot" style="background:${m.color}"></span><span>${m.kw}</span><span class="kw-opt-grp">${m.groups.map(g=>g.label).join('/')}</span>`;
+      o.onmousedown=(e)=>{e.preventDefault();state.trendKws.push(m.kw);renderContent();};
+      drop.appendChild(o);
+    });
+    drop.classList.add('show');
   }
-  return wrap;
+  inp.oninput=()=>show(inp.value);
+  inp.onfocus=()=>show(inp.value);
+  inp.onblur=()=>setTimeout(()=>drop.classList.remove('show'),150);
 }
-
-function buildTrend(gk){
-  var g = D.groups[gk];
-  var {cols} = getColsForGroup(gk, state.gran);
-  var m = state.metric;
-  var wrap = mk('div','trend-wrap');
-  var grid = mk('div','trend-grid');
-  var top20 = g.rows.slice(0,20);
-  top20.forEach(row=>{
-    var vals = cols.map(col=>getVal(row.kw, col.dates, m));
-    var labels = cols.map(col=>col.label);
-    var card = mk('div','tcard');
-    var kw = mk('div','tcard-kw');
-    kw.textContent=row.kw;
-    kw.style.color=row.red?'var(--red)':'var(--text)';
-    var canvas = mk('canvas');
-    canvas.width=280; canvas.height=60;
-    card.appendChild(kw); card.appendChild(canvas);
-    grid.appendChild(card);
-    requestAnimationFrame(()=>drawSparkline(canvas,vals,labels,g.color));
+var METRIC_SEQ=['u','t','c','p','n'];
+function drawTrend(){
+  var cols=trendCols(), labels=cols.map(c=>c.label);
+  // 序列定义（与指标无关）
+  var defs=[];
+  if(state.trendKws.length){
+    state.trendKws.forEach((kw,i)=>{
+      var row=findRow(kw); if(!row) return;
+      defs.push({name:kw,color:SERIES_PALETTE[i%SERIES_PALETTE.length],groups:groupsOf(kw),row:row});
+    });
+  } else {
+    GROUP_ORDER.forEach(gk=>{var g=D.groups[gk];defs.push({name:g.label,color:g.color,rows:g.rows});});
+  }
+  // 图例（关键词序列附带所属词分类）
+  var lg=document.getElementById('legend');lg.innerHTML='';
+  defs.forEach(s=>{
+    var grpTxt=s.groups?` <span class="lg-grp">${s.groups.map(g=>g.label).join('/')}</span>`:'';
+    var e=mk('span','lg');e.innerHTML=`<span class="lg-line" style="background:${s.color}"></span>${s.name}${grpTxt}`;lg.appendChild(e);
   });
-  wrap.appendChild(grid);
-  return wrap;
+  // 每个选中指标一张图
+  var metrics=METRIC_SEQ.filter(m=>state.trendMetrics.indexOf(m)>=0);
+  var host=document.getElementById('charts');host.innerHTML='';
+  var hgt=metrics.length>1?250:320;
+  metrics.forEach(metric=>{
+    var block=mk('div','chart-block');
+    var ttl=mk('div','chart-title');ttl.textContent=METRIC_NAME[metric]+((metric==='c'||metric==='p'||metric==='n')?'（%）':'');
+    block.appendChild(ttl);
+    var cw=mk('div','chart-wrap');var cv=mk('canvas','bigchart');cw.appendChild(cv);block.appendChild(cw);
+    host.appendChild(block);
+    var series=defs.map(d=>({
+      name:d.name,color:d.color,
+      values:cols.map(col=> d.row?getVal(d.row,col.dates,metric):groupAvg(d.rows,col.dates,metric))
+    }));
+    drawMultiLine(cv,series,labels,metric,hgt);
+  });
 }
-
-function drawSparkline(canvas,vals,labels,color){
-  var ctx=canvas.getContext('2d');
-  var W=canvas.width,H=canvas.height;
-  var nonNull=vals.filter(v=>v!==null);
-  if(nonNull.length<2) return;
-  var mn=Math.min(...nonNull), mx=Math.max(...nonNull);
-  var rng=mx-mn||1;
-  var pad={t:6,b:18,l:6,r:6};
+function drawMultiLine(canvas,series,labels,metric,height){
+  var DPR=window.devicePixelRatio||1;
+  var host=canvas.parentNode;
+  var W=Math.max(640,host.clientWidth), H=height||320;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  canvas.width=W*DPR;canvas.height=H*DPR;
+  var ctx=canvas.getContext('2d');ctx.scale(DPR,DPR);ctx.clearRect(0,0,W,H);
+  var pad={t:16,r:20,b:42,l:60};
   var cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
-  ctx.clearRect(0,0,W,H);
-  var n=vals.length;
-  var pts=vals.map((v,i)=>{
-    if(v===null) return null;
-    return {x:pad.l+(i/(n-1))*cw, y:pad.t+ch-((v-mn)/rng)*ch, v};
-  });
-  // fill
-  ctx.fillStyle=color+'20';
-  ctx.beginPath();
-  var started=false;
-  pts.forEach(p=>{
-    if(!p){started=false;return;}
-    if(!started){ctx.moveTo(p.x,pad.t+ch);ctx.lineTo(p.x,p.y);started=true;}
-    else ctx.lineTo(p.x,p.y);
-  });
-  var last=pts.filter(Boolean).pop();
-  if(last){ctx.lineTo(last.x,pad.t+ch);}
-  ctx.closePath();ctx.fill();
-  // line
-  ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.lineJoin='round';
-  ctx.beginPath();started=false;
-  pts.forEach(p=>{
-    if(!p){started=false;return;}
-    if(!started){ctx.moveTo(p.x,p.y);started=true;}
-    else ctx.lineTo(p.x,p.y);
-  });
-  ctx.stroke();
-  // dots
-  pts.forEach(p=>{
-    if(!p) return;
-    ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,2.5,0,Math.PI*2);ctx.fill();
-  });
-  // labels (skip if too many)
-  ctx.fillStyle='rgba(148,163,184,.6)';ctx.font='9px '+getComputedStyle(document.body).fontFamily;ctx.textAlign='center';
-  var step=Math.ceil(n/6);
-  labels.forEach((l,i)=>{
-    if(n<=8||i%step===0||i===n-1){
-      var x=pad.l+(i/(n-1))*cw;
-      ctx.fillText(l.length>5?l.slice(0,5):l, x, H-3);
-    }
+  var all=[];series.forEach(s=>s.values.forEach(v=>{if(v!==null)all.push(v);}));
+  if(!all.length) return;
+  var mn=Math.min(...all),mx=Math.max(...all);
+  if(metric==='c'||metric==='p'||metric==='n'){mn=Math.max(0,mn);}
+  if(mn===mx){mn=mn*0.9;mx=mx*1.1||1;}
+  var rng=mx-mn||1; mn=mn-rng*0.08; mx=mx+rng*0.08; rng=mx-mn;
+  var n=labels.length;
+  function X(i){return pad.l+(n<=1?0:(i/(n-1))*cw);}
+  function Y(v){return pad.t+ch-((v-mn)/rng)*ch;}
+  // grid + y labels
+  ctx.font='11px '+getComputedStyle(document.body).fontFamily;
+  ctx.textBaseline='middle';
+  var TICKS=5;
+  for(var g=0;g<=TICKS;g++){
+    var val=mn+(rng*g/TICKS), y=Y(val);
+    ctx.strokeStyle='#eef0f3';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+cw,y);ctx.stroke();
+    ctx.fillStyle='#a8b0bd';ctx.textAlign='right';
+    var lab=(metric==='u'||metric==='t')?Math.round(val).toLocaleString('zh-CN'):val.toFixed(1)+'%';
+    ctx.fillText(lab,pad.l-8,y);
+  }
+  // x labels
+  ctx.fillStyle='#86909c';ctx.textAlign='center';ctx.textBaseline='top';
+  var step=Math.ceil(n/8);
+  labels.forEach((l,i)=>{ if(n<=10||i%step===0||i===n-1){ var lx=l.length>7?l.slice(0,7):l; ctx.fillText(lx,X(i),pad.t+ch+10);} });
+  // lines
+  series.forEach(s=>{
+    ctx.strokeStyle=s.color;ctx.lineWidth=2;ctx.lineJoin='round';ctx.beginPath();
+    var started=false;
+    s.values.forEach((v,i)=>{ if(v===null){started=false;return;} var x=X(i),y=Y(v); if(!started){ctx.moveTo(x,y);started=true;}else ctx.lineTo(x,y); });
+    ctx.stroke();
+    s.values.forEach((v,i)=>{ if(v===null)return; ctx.fillStyle=s.color;ctx.beginPath();ctx.arc(X(i),Y(v),2.6,0,Math.PI*2);ctx.fill(); });
   });
 }
 
-function mk(tag,cls){
-  var el=document.createElement(tag);
-  if(cls) el.className=cls;
-  return el;
-}
+function mk(tag,cls){var e=document.createElement(tag);if(cls)e.className=cls;return e;}
+window.addEventListener('resize',()=>{ if(state.tab==='trend') drawTrend(); });
 </script>
 </body>
 </html>
