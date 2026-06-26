@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>重点词定义 · 阈值验证</title>
+<title>搜索重点词库</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -118,7 +118,7 @@ tr:hover td{background:var(--subtle)}
 <body>
 <div id="tip"></div>
 <div class="hdr">
-  <div><span class="logo">重点词定义 <span>·</span> 阈值验证</span><span class="badge">wmdj 1229–0621</span></div>
+  <div><span class="logo">搜索重点词库</span><span class="badge">wmdj 1229–0621</span></div>
   <div class="hdr-right">
     <div class="cwsel">
       <label>截止日期</label>
@@ -278,10 +278,11 @@ function spark(k){
   // 波峰/波谷索引
   var maxI=0,minI=0; for(i=1;i<plot.length;i++){ if(plot[i]>plot[maxI])maxI=i; if(plot[i]<plot[minI])minI=i; }
   var dots='';
-  for(i=0;i<n-1;i++){ // 不标记当前周（最右点）
+  for(i=0;i<n;i++){
     var cx=X(i).toFixed(1), cy=Y(plot[i]).toFixed(1);
-    if(i===maxI)     dots+='<circle cx="'+cx+'" cy="'+cy+'" r="2.3" fill="#00b42a"/>';
-    else if(i===minI)dots+='<circle cx="'+cx+'" cy="'+cy+'" r="2.3" fill="#f5222d"/>';
+    if(i===maxI)     dots+='<circle cx="'+cx+'" cy="'+cy+'" r="2.6" fill="#00b42a"/>';       // 波峰
+    else if(i===minI)dots+='<circle cx="'+cx+'" cy="'+cy+'" r="2.6" fill="#f5222d"/>';       // 波谷
+    else if(i===n-1) continue;                                                                // 当前周非峰谷不标记
     else             dots+='<circle cx="'+cx+'" cy="'+cy+'" r="1.5" fill="#fff" stroke="#b6bcc6" stroke-width="1"/>';
   }
   // 每周一个透明 hit 区，自定义浮层提示"日期区间 + 当周日均"
