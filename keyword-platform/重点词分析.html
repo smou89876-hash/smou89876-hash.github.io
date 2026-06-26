@@ -35,6 +35,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 .panel-h{padding:13px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
 .panel-h .rst{font-size:11px;color:var(--primary);cursor:pointer;font-weight:500}
 .panel-b{padding:6px 16px 14px;max-height:calc(100vh - 160px);overflow:auto}
+.layout.collapsed{grid-template-columns:1fr}
+.layout.collapsed .panel{display:none}
+.ctlToggle{border:1px solid var(--border2);background:var(--surface);border-radius:6px;padding:7px 12px;font-size:12.5px;color:var(--text2);cursor:pointer;font-family:var(--font);white-space:nowrap}
+.ctlToggle:hover{border-color:var(--primary);color:var(--primary)}
 .cat-block{padding:12px 0;border-bottom:1px dashed var(--border)}
 .cat-block:last-child{border-bottom:none}
 .cat-title{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;margin-bottom:10px}
@@ -124,7 +128,7 @@ tr:hover td{background:var(--subtle)}
 </div>
 <div class="main">
   <p class="note">数据共 <b>168 天（2025-12-29 ~ 2026-06-14）</b>。选择<b>截止日期</b>，当前窗口=截止日往前 7 天；环比为再往前 7 天；12周/4周/过去30天等窗口均从截止日按天滑动。<b>增长四类（TOP&gt;长期&gt;短期&gt;发现新词）按优先级互斥</b>；<b>衰减、无结果</b>为并行独立标签。"日均"=窗口内指标 ÷ 天数（缺失日记 0）；日均GMV=当前 7 天GMV ÷ 7。</p>
-  <div class="layout">
+  <div class="layout" id="layout">
     <div class="panel">
       <div class="panel-h">阈值参数 <span class="rst" id="resetBtn">恢复默认</span></div>
       <div class="panel-b" id="ctlBox"></div>
@@ -132,6 +136,7 @@ tr:hover td{background:var(--subtle)}
     <div>
       <div class="cards" id="cards"></div>
       <div class="toolbar">
+        <button class="ctlToggle" id="ctlToggle"></button>
         <input class="search" id="search" placeholder="搜索关键词…">
         <div class="divs" id="divs"></div>
       </div>
@@ -267,14 +272,12 @@ function spark(k){
   var X=function(i){return n>1?pad+i*(W-2*pad)/(n-1):W/2;};
   var Y=function(v){return H-pad-(v-mn)/rng*(H-2*pad);};
   var pts=plot.map(function(v,i){return X(i).toFixed(1)+','+Y(v).toFixed(1);});
-  var col=(plot[n-1]>=plot[0])?'#00b42a':'#f5222d';
   // 波峰/波谷索引
   var maxI=0,minI=0; for(i=1;i<plot.length;i++){ if(plot[i]>plot[maxI])maxI=i; if(plot[i]<plot[minI])minI=i; }
   var dots='';
-  for(i=0;i<n;i++){
+  for(i=0;i<n-1;i++){ // 不标记当前周（最右点）
     var cx=X(i).toFixed(1), cy=Y(plot[i]).toFixed(1);
-    if(i===n-1)      dots+='<circle cx="'+cx+'" cy="'+cy+'" r="2.6" fill="'+col+'"/>';
-    else if(i===maxI)dots+='<circle cx="'+cx+'" cy="'+cy+'" r="2.3" fill="#00b42a"/>';
+    if(i===maxI)     dots+='<circle cx="'+cx+'" cy="'+cy+'" r="2.3" fill="#00b42a"/>';
     else if(i===minI)dots+='<circle cx="'+cx+'" cy="'+cy+'" r="2.3" fill="#f5222d"/>';
     else             dots+='<circle cx="'+cx+'" cy="'+cy+'" r="1.5" fill="#fff" stroke="#b6bcc6" stroke-width="1"/>';
   }
@@ -402,7 +405,12 @@ document.addEventListener('mousemove',function(e){
   else if(tipEl.style.opacity!=='0'){ tipEl.style.opacity='0'; }
 });
 
-buildControls(); setA(NDAYS-1);
+var ctlCollapsed=true; // 阈值面板默认收起，词库满屏展开
+var layoutEl=document.getElementById('layout');
+function applyCtlCollapse(){ layoutEl.classList.toggle('collapsed',ctlCollapsed); document.getElementById('ctlToggle').textContent=ctlCollapsed?'⚙ 阈值参数 ›':'⚙ 收起阈值 ‹'; }
+document.getElementById('ctlToggle').onclick=function(){ ctlCollapsed=!ctlCollapsed; applyCtlCollapse(); };
+
+buildControls(); applyCtlCollapse(); setA(NDAYS-1);
 </script>
 </body>
 </html>
