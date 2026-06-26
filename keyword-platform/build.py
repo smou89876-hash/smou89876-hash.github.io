@@ -26,6 +26,7 @@ COL_KW     = 2
 COL_U      = 3  # 搜索人数
 COL_C      = 4  # 搜索次数
 COL_GMV    = 5  # GMV
+COL_PAY    = 7  # 支付率%（可选列）
 COL_NORES  = 8  # 搜索无结果率%（可选列，旧文件可能没有）
 
 
@@ -36,11 +37,14 @@ def load_xlsx(path):
     rows = ws.iter_rows(values_only=True)
     header = next(rows)  # 跳过表头
 
-    # 动态检测搜索无结果率列
+    # 动态检测可选列
     nores_col = None
+    pay_col = None
     for i, h in enumerate(header):
         if h and '无结果' in str(h):
             nores_col = i
+        if h and '支付率' in str(h):
+            pay_col = i
 
     data = {}
     for row in rows:
@@ -52,12 +56,17 @@ def load_xlsx(path):
         u   = int(row[COL_U] or 0)
         c   = int(row[COL_C] or 0)
         g   = int(round(float(row[COL_GMV] or 0)))
-        # r = 无结果搜索绝对件数（便于后续聚合）
+        # r = 无结果搜索绝对件数（按搜索次数加权，便于聚合 sum(r)/sum(c)）
         if nores_col is not None and row[nores_col] is not None:
             r = int(round(float(row[nores_col]) * c))
         else:
             r = 0
-        data[(date_str, kw)] = {'div': div, 'u': u, 'c': c, 'g': g, 'r': r}
+        # p = 支付绝对人数（按搜索人数加权，便于聚合 sum(p)/sum(u)）
+        if pay_col is not None and row[pay_col] is not None:
+            p = int(round(float(row[pay_col]) * u))
+        else:
+            p = 0
+        data[(date_str, kw)] = {'div': div, 'u': u, 'c': c, 'g': g, 'r': r, 'p': p}
     wb.close()
     return data
 
@@ -85,7 +94,7 @@ def build_json():
 
     kw_list = []
     for kw in all_kws:
-        u_arr, c_arr, g_arr, r_arr = [], [], [], []
+        u_arr, c_arr, g_arr, r_arr, p_arr = [], [], [], [], []
         for date in all_dates:
             row = merged.get((date, kw))
             if row:
@@ -93,11 +102,13 @@ def build_json():
                 c_arr.append(row['c'])
                 g_arr.append(row['g'])
                 r_arr.append(row['r'])
+                p_arr.append(row['p'])
             else:
                 u_arr.append(0)
                 c_arr.append(0)
                 g_arr.append(0)
                 r_arr.append(0)
+                p_arr.append(0)
         kw_list.append({
             'n': kw,
             'd': kw_div[kw],
@@ -105,6 +116,7 @@ def build_json():
             'c': c_arr,
             'r': r_arr,
             'g': g_arr,
+            'p': p_arr,
         })
 
     result = {
