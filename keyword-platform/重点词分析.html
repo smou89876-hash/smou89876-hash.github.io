@@ -29,16 +29,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 .cwbtn:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
 .cwbtn:disabled{opacity:.4;cursor:not-allowed}
 .main{padding:20px clamp(16px,3vw,56px);max-width:2400px;margin:0 auto}
-.layout{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
-@media(max-width:1000px){.layout{grid-template-columns:1fr}}
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);position:sticky;top:74px}
+.layout{display:flex;gap:18px;align-items:flex-start}
+.panel{flex:0 0 300px;width:300px;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);position:sticky;top:74px;transition:margin-left .26s ease,opacity .2s ease}
+.content{flex:1 1 auto;min-width:0}
+@media(max-width:760px){.panel{flex-basis:84vw;width:84vw}}
 .panel-h{padding:13px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
 .panel-h .rst{font-size:11px;color:var(--primary);cursor:pointer;font-weight:500}
 .panel-b{padding:6px 16px 14px;max-height:calc(100vh - 160px);overflow:auto}
-.layout.collapsed{grid-template-columns:1fr}
-.layout.collapsed .panel{display:none}
-.ctlToggle{border:1px solid var(--border2);background:var(--surface);border-radius:6px;padding:7px 12px;font-size:12.5px;color:var(--text2);cursor:pointer;font-family:var(--font);white-space:nowrap}
-.ctlToggle:hover{border-color:var(--primary);color:var(--primary)}
+.layout.collapsed .panel{margin-left:-318px;opacity:0;pointer-events:none}
+.drawerTab{position:fixed;left:0;top:50%;transform:translateY(-50%);width:22px;height:62px;background:var(--surface);border:1px solid var(--border2);border-left:none;border-radius:0 10px 10px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:600;color:var(--text2);font-size:15px;box-shadow:2px 0 8px rgba(0,0,0,.10);transition:color .15s,border-color .15s}
+.drawerTab:hover{color:var(--primary);border-color:var(--primary)}
+.drawerTab .lbl{position:absolute;left:26px;white-space:nowrap;font-size:11px;background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:3px 8px;color:var(--text2);opacity:0;pointer-events:none;transition:opacity .15s;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.drawerTab:hover .lbl{opacity:1}
 .cat-block{padding:12px 0;border-bottom:1px dashed var(--border)}
 .cat-block:last-child{border-bottom:none}
 .cat-title{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;margin-bottom:10px}
@@ -129,15 +131,15 @@ tr:hover td{background:var(--subtle)}
 </div>
 <div class="main">
   <p class="note">数据共 <b>168 天（2025-12-29 ~ 2026-06-14）</b>。选择<b>截止日期</b>，当前窗口=截止日往前 7 天；环比为再往前 7 天；12周/4周/过去30天等窗口均从截止日按天滑动。<b>增长四类（TOP&gt;长期&gt;短期&gt;发现新词）按优先级互斥</b>；<b>衰减、无结果</b>为并行独立标签。"日均"=窗口内指标 ÷ 天数（缺失日记 0）；日均GMV=当前 7 天GMV ÷ 7。</p>
+  <button class="drawerTab" id="ctlToggle" title="展开/收起阈值参数"><span class="arr"></span><span class="lbl"></span></button>
   <div class="layout" id="layout">
     <div class="panel">
       <div class="panel-h">阈值参数 <span class="rst" id="resetBtn">恢复默认</span></div>
       <div class="panel-b" id="ctlBox"></div>
     </div>
-    <div>
+    <div class="content">
       <div class="cards" id="cards"></div>
       <div class="toolbar">
-        <button class="ctlToggle" id="ctlToggle"></button>
         <input class="search" id="search" placeholder="搜索关键词…">
         <div class="divs" id="divs"></div>
       </div>
@@ -406,9 +408,14 @@ document.addEventListener('mousemove',function(e){
   else if(tipEl.style.opacity!=='0'){ tipEl.style.opacity='0'; }
 });
 
-var ctlCollapsed=true; // 阈值面板默认收起，词库满屏展开
+var ctlCollapsed=true; // 阈值抽屉默认收起，词库满屏展开
 var layoutEl=document.getElementById('layout');
-function applyCtlCollapse(){ layoutEl.classList.toggle('collapsed',ctlCollapsed); document.getElementById('ctlToggle').textContent=ctlCollapsed?'⚙ 阈值参数 ›':'⚙ 收起阈值 ‹'; }
+function applyCtlCollapse(){
+  layoutEl.classList.toggle('collapsed',ctlCollapsed);
+  var tab=document.getElementById('ctlToggle');
+  tab.querySelector('.arr').textContent=ctlCollapsed?'›':'‹';
+  tab.querySelector('.lbl').textContent=ctlCollapsed?'展开阈值参数':'收起阈值参数';
+}
 document.getElementById('ctlToggle').onclick=function(){ ctlCollapsed=!ctlCollapsed; applyCtlCollapse(); };
 
 buildControls(); applyCtlCollapse(); setA(NDAYS-1);
