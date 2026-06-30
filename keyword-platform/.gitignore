@@ -1,3 +1,11 @@
 # 原始数据与内部文档不发布到公网，仅发布 demo（index.html + data.json）
 *.xlsx
 *.pdf
+*.md
+
+# 数据库连接串（含密码，绝不提交）
+.env
+.env.local
+
+# Python 缓存
+__pycache__/
