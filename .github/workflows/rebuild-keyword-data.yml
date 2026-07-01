@@ -1,0 +1,53 @@
+# 云端重建重点词看板数据：在 GitHub runner 上跑 build_db.py（到 Supabase us-west-2 是云端骨干网，
+# 几十秒即可拉完全表），生成 重点词_分析数据.js 并提交回 main，随后 deploy-github-pages 自动发布。
+#
+# 手动触发：仓库 Actions → “重建重点词看板数据” → Run workflow。
+# 前置：仓库 Settings → Secrets and variables → Actions 添加 secret：DATABASE_URL（值同 keyword-platform/.env）。
+
+name: 重建重点词看板数据
+
+on:
+  workflow_dispatch:
+  # 如需每周自动重建，取消下面两行注释（UTC 周一 01:00 ≈ 北京时间周一 09:00）：
+  # schedule:
+  #   - cron: "0 1 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rebuild-keyword-data
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install psycopg2-binary
+
+      - name: Rebuild dashboard data
+        working-directory: keyword-platform
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python -u build_db.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "keyword-platform/重点词_分析数据.js" "keyword-platform/重点词分析.html"
+          if git diff --staged --quiet; then
+            echo "数据无变化，跳过提交。"
+          else
+            git commit -m "重建看板数据（云端自动）"
+            git push
+          fi
