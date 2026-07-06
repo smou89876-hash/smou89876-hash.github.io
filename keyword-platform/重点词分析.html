@@ -91,6 +91,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 .gcnt{font-size:11px;color:var(--text2);background:var(--subtle);padding:2px 8px;border-radius:10px;border:1px solid var(--border);font-family:var(--mono)}
 .gdesc{font-size:11.5px;color:var(--muted);margin-left:2px;flex:1}
 .glim{font-size:11px;color:#d4690a;background:#fff4e8;border:1px solid #ffd8a8;border-radius:4px;padding:1px 7px}
+.gexp{flex:none;font-size:11px;color:var(--primary);background:var(--primary-soft);border:1px solid transparent;border-radius:4px;padding:2px 10px;font-weight:500;cursor:pointer}
+.gexp:hover{border-color:var(--primary)}
 .gcaret{color:var(--muted2);font-size:11px;transition:.2s}
 .gpanel.collapsed .gbody{display:none}
 .gpanel.collapsed .gcaret{transform:rotate(-90deg)}
@@ -370,6 +372,78 @@ function syncLgPos(){
 function passFilter(k){ if(divFilter!=='全部'&&k.d!==divFilter)return false; if(searchTerm&&k.n.indexOf(searchTerm)<0)return false; return true; }
 function recompute(){ KW.forEach(function(k){k._m=metrics(k,A)}); buildRank(); }
 
+// ===== 词库导出（零依赖生成 xlsx：ZIP 存储式 + 最小 OOXML）=====
+/*XLSX_CORE_BEGIN*/
+var CRC_TBL=(function(){var t=[],c,i,j;for(i=0;i<256;i++){c=i;for(j=0;j<8;j++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[i]=c>>>0;}return t;})();
+function crc32(b){var c=0xFFFFFFFF,i;for(i=0;i<b.length;i++)c=CRC_TBL[(c^b[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function xmlEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function utf8(s){return new TextEncoder().encode(s);}
+// files: [{name, xml}] → 存储式(无压缩) zip 字节
+function zipStore(files){
+  var chunks=[],cd=[],off=0;
+  function u16(v){return [v&255,(v>>8)&255];}
+  function u32(v){return [v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255];}
+  files.forEach(function(f){
+    var name=utf8(f.name),data=utf8(f.xml),crc=crc32(data);
+    var hdr=[].concat(u32(0x04034b50),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0));
+    chunks.push(new Uint8Array(hdr),name,data);
+    cd.push([[].concat(u32(0x02014b50),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(off)),name]);
+    off+=hdr.length+name.length+data.length;
+  });
+  var cdStart=off,cdLen=0;
+  cd.forEach(function(e){var h=new Uint8Array(e[0]);chunks.push(h,e[1]);cdLen+=h.length+e[1].length;});
+  chunks.push(new Uint8Array([].concat(u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(cdLen),u32(cdStart),u16(0))));
+  var total=0;chunks.forEach(function(c){total+=c.length});
+  var out=new Uint8Array(total),p=0;chunks.forEach(function(c){out.set(c,p);p+=c.length;});
+  return out;
+}
+// rows: 每行为单元格数组，单元格 {t:'s'|'n'|'p', v}（p=百分比数值，套 0.0% 样式）
+function buildXlsxBytes(sheetName,rows){
+  var COLS='ABCDEFGH';
+  var sd=rows.map(function(r,ri){
+    return '<row r="'+(ri+1)+'">'+r.map(function(c,ci){
+      var ref=COLS[ci]+(ri+1);
+      if(c.t==='s')return '<c r="'+ref+'" t="inlineStr"><is><t xml:space="preserve">'+xmlEsc(c.v)+'</t></is></c>';
+      if(c.t==='p')return '<c r="'+ref+'" s="1"><v>'+c.v+'</v></c>';
+      return '<c r="'+ref+'"><v>'+c.v+'</v></c>';
+    }).join('')+'</row>';
+  }).join('');
+  var M='http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+  var sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="'+M+'"><cols><col min="1" max="1" width="12" customWidth="1"/><col min="2" max="2" width="24" customWidth="1"/><col min="3" max="5" width="14" customWidth="1"/></cols><sheetData>'+sd+'</sheetData></worksheet>';
+  var styles='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="'+M+'"><numFmts count="1"><numFmt numFmtId="164" formatCode="0.0%"/></numFmts><fonts count="1"><font><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+  var wb='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="'+M+'" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="'+xmlEsc(sheetName)+'" sheetId="1" r:id="rId1"/></sheets></workbook>';
+  var wbRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+  var rootRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+  var ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
+  return zipStore([
+    {name:'[Content_Types].xml',xml:ct},
+    {name:'_rels/.rels',xml:rootRels},
+    {name:'xl/workbook.xml',xml:wb},
+    {name:'xl/_rels/workbook.xml.rels',xml:wbRels},
+    {name:'xl/styles.xml',xml:styles},
+    {name:'xl/worksheets/sheet1.xml',xml:sheet},
+  ]);
+}
+/*XLSX_CORE_END*/
+// 导出某词库：当前平台/截止日/搜索/Division 过滤后的全部词（跨分页），按当前排序
+function exportCat(catK){
+  var c=CATS.find(function(x){return x.k===catK});
+  var rows=memberKeys(catK).filter(passFilter);
+  var ss=sortState[catK]||{col:c.cols[0][0],dir:-1};
+  rows.sort(function(a,b){return (sortVal(ss.col,a)-sortVal(ss.col,b))*ss.dir});
+  var aoa=[[{t:'s',v:'重点词类别'},{t:'s',v:'关键词'},{t:'s',v:'日均搜索人数'},{t:'s',v:'平均支付率'},{t:'s',v:'日均GMV'}]];
+  rows.forEach(function(k){var m=k._m;
+    aoa.push([{t:'s',v:catK},{t:'s',v:k.n},{t:'n',v:Math.round(m.cur)},{t:'p',v:(m.pr/100).toFixed(6)},{t:'n',v:Math.round(m.gmv)}]);
+  });
+  var mmdd=function(i){return fmtMD(i).replace('/','');};
+  var fname='重点词_'+catK+'_'+CUR_PLAT+'_'+mmdd(A-6)+'-'+mmdd(A)+'.xlsx';
+  var bytes=buildXlsxBytes(catK,aoa);
+  var blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
+}
+
 function render(){
   var counts={}; CATS.forEach(function(c){counts[c.k]=memberKeys(c.k)});
   CATS.forEach(function(c){document.getElementById('cnt_'+c.k).textContent=counts[c.k].length});
@@ -402,7 +476,7 @@ function render(){
         +'<button class="pbtn" data-cat="'+c.k+'" data-pg="'+(pages-1)+'"'+(page===pages-1?' disabled':'')+'>»</button></div>';
     }
     var body=total? '<table><thead><tr>'+thead+'</tr></thead><tbody>'+tbody+'</tbody></table>'+pager : '<div class="empty">'+(catAvailable(c.k)?'当前阈值/过滤下无匹配词':'截止日往前历史不足，无法计算该类窗口')+'</div>';
-    return '<div class="gpanel'+(c._collapsed?' collapsed':'')+'" data-cat="'+c.k+'"><div class="ghdr" style="--c:'+c.c+'"><span class="dot"></span><span class="gname">'+c.k+'</span><span class="gcnt">'+total+'</span><span class="gdesc">'+c.desc+'</span>'+lim+'<span class="gcaret">▾</span></div><div class="gbody">'+body+'</div></div>';
+    return '<div class="gpanel'+(c._collapsed?' collapsed':'')+'" data-cat="'+c.k+'"><div class="ghdr" style="--c:'+c.c+'"><span class="dot"></span><span class="gname">'+c.k+'</span><span class="gcnt">'+total+'</span><span class="gdesc">'+c.desc+'</span>'+lim+'<span class="gexp" data-cat="'+c.k+'" title="导出当前过滤下全部 '+total+' 词（xlsx）">导出</span><span class="gcaret">▾</span></div><div class="gbody">'+body+'</div></div>';
   }).join('');
   bind();
 }
@@ -411,6 +485,7 @@ function bind(){
   document.querySelectorAll('.ghdr').forEach(function(el){el.onclick=function(){var cat=el.parentNode.dataset.cat;var c=CATS.find(function(x){return x.k===cat});c._collapsed=!c._collapsed;render();};});
   document.querySelectorAll('th[data-col]').forEach(function(el){el.onclick=function(){var cat=el.closest('.gpanel').dataset.cat;var col=el.dataset.col;var ss=sortState[cat]||{col:col,dir:-1};if(ss.col===col)ss.dir*=-1;else{ss.col=col;ss.dir=-1;}sortState[cat]=ss;CATS.find(function(x){return x.k===cat})._page=0;render();};});
   document.querySelectorAll('.pbtn').forEach(function(el){el.onclick=function(){if(el.disabled)return;CATS.find(function(x){return x.k===el.dataset.cat})._page=parseInt(el.dataset.pg);render();};});
+  document.querySelectorAll('.gexp').forEach(function(el){el.onclick=function(e){e.stopPropagation();exportCat(el.dataset.cat);};});
 }
 
 var dateSel=document.getElementById('dateSel');
