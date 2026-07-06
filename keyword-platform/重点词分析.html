@@ -12,8 +12,8 @@
   --primary:#3a6ff7;--primary-soft:#eaf0ff;
   --red:#f5222d;--green:#00b42a;
   --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
-  --font:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei','Segoe UI',sans-serif;
-  --mono:'SF Mono','DIN Alternate','Roboto Mono',monospace;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei','Helvetica Neue',Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono','Menlo','Consolas','Roboto Mono',monospace;
 }
 body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;-webkit-font-smoothing:antialiased;padding-bottom:60px}
 .hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:200}
@@ -28,13 +28,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 .cwbtn{border:1px solid var(--border2);background:var(--surface);border-radius:5px;width:26px;height:26px;cursor:pointer;color:var(--text2);font-size:13px}
 .cwbtn:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
 .cwbtn:disabled{opacity:.4;cursor:not-allowed}
-.main{padding:20px 24px;max-width:1520px;margin:0 auto}
-.layout{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
-@media(max-width:1000px){.layout{grid-template-columns:1fr}}
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);position:sticky;top:74px}
+.main{padding:20px clamp(16px,3vw,56px);max-width:2400px;margin:0 auto}
+.layout{display:flex;gap:18px;align-items:flex-start}
+.panel{flex:0 0 300px;width:300px;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);position:sticky;top:74px;transition:margin-left .26s ease,opacity .2s ease}
+.content{flex:1 1 auto;min-width:0}
+@media(max-width:760px){.panel{flex-basis:84vw;width:84vw}}
 .panel-h{padding:13px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
 .panel-h .rst{font-size:11px;color:var(--primary);cursor:pointer;font-weight:500}
 .panel-b{padding:6px 16px 14px;max-height:calc(100vh - 160px);overflow:auto}
+.layout.collapsed .panel{margin-left:-318px;opacity:0;pointer-events:none}
+.drawerTab{position:fixed;left:0;top:50%;transform:translateY(-50%);width:22px;height:62px;background:var(--surface);border:1px solid var(--border2);border-left:none;border-radius:0 10px 10px 0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:600;color:var(--text2);font-size:15px;box-shadow:2px 0 8px rgba(0,0,0,.10);transition:color .15s,border-color .15s}
+.drawerTab:hover{color:var(--primary);border-color:var(--primary)}
+.drawerTab .lbl{position:absolute;left:26px;white-space:nowrap;font-size:11px;background:var(--surface);border:1px solid var(--border2);border-radius:5px;padding:3px 8px;color:var(--text2);opacity:0;pointer-events:none;transition:opacity .15s;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.drawerTab:hover .lbl{opacity:1}
 .cat-block{padding:12px 0;border-bottom:1px dashed var(--border)}
 .cat-block:last-child{border-bottom:none}
 .cat-title{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;margin-bottom:10px}
@@ -61,6 +67,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 #tip{position:fixed;z-index:500;background:#1d2129;color:#fff;font-size:11px;font-family:var(--mono);padding:4px 9px;border-radius:5px;pointer-events:none;white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.28);opacity:0;transition:opacity .08s;transform:translate(-50%,-150%)}
 .cards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px}
 @media(max-width:1280px){.cards{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:680px){.cards{grid-template-columns:repeat(2,1fr)}}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:13px 14px;box-shadow:var(--shadow);cursor:pointer;transition:.15s;border-left:3px solid var(--c)}
 .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08);transform:translateY(-1px)}
 .card.active{background:var(--cs);box-shadow:0 0 0 2px var(--c) inset}
@@ -74,6 +81,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 .divs{display:flex;gap:2px;background:var(--subtle);border:1px solid var(--border);border-radius:6px;padding:3px;flex-wrap:wrap}
 .dbtn{padding:4px 10px;border-radius:4px;border:none;background:none;color:var(--text2);cursor:pointer;font-size:11.5px;font-family:var(--font)}
 .dbtn.on{background:var(--surface);color:var(--primary);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.pfsel{display:flex;gap:2px;background:var(--subtle);border:1px solid var(--border2);border-radius:6px;padding:3px}
+.pfbtn{padding:4px 12px;border-radius:4px;border:none;background:none;color:var(--text2);cursor:pointer;font-size:12px;font-family:var(--font);font-weight:500}
+.pfbtn.on{background:var(--surface);color:var(--primary);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .gpanel{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
 .ghdr{padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;border-left:3px solid var(--c)}
 .ghdr .dot{width:9px;height:9px;border-radius:50%;background:var(--c)}
@@ -111,8 +121,9 @@ tr:hover td{background:var(--subtle)}
 <body>
 <div id="tip"></div>
 <div class="hdr">
-  <div><span class="logo">重点词定义 <span>·</span> 阈值验证</span><span class="badge">wmdj 1229–0621</span></div>
+  <div><span class="logo">搜索重点词库</span><span class="badge" id="badge"></span></div>
   <div class="hdr-right">
+    <div class="pfsel" id="pfSel"></div>
     <div class="cwsel">
       <label>截止日期</label>
       <button class="cwbtn" id="cwPrev">‹</button>
@@ -123,13 +134,14 @@ tr:hover td{background:var(--subtle)}
   </div>
 </div>
 <div class="main">
-  <p class="note">数据共 <b>168 天（2025-12-29 ~ 2026-06-14）</b>。选择<b>截止日期</b>，当前窗口=截止日往前 7 天；环比为再往前 7 天；12周/4周/过去30天等窗口均从截止日按天滑动。<b>增长四类（TOP&gt;长期&gt;短期&gt;发现新词）按优先级互斥</b>；<b>衰减、无结果</b>为并行独立标签。"日均"=窗口内指标 ÷ 天数（缺失日记 0）；日均GMV=当前 7 天GMV ÷ 7。</p>
-  <div class="layout">
+  <p class="note">数据共 <b id="noteRange"></b>。选择<b>截止日期</b>，当前窗口=截止日往前 7 天；环比为再往前 7 天；12周/4周/过去30天等窗口均从截止日按天滑动。<b>增长四类（TOP&gt;长期&gt;短期&gt;发现新词）按优先级互斥</b>；<b>衰减、无结果</b>为并行独立标签。"日均"=窗口内指标 ÷ 天数（缺失日记 0）；日均GMV=当前 7 天GMV ÷ 7。</p>
+  <button class="drawerTab" id="ctlToggle" title="展开/收起阈值参数"><span class="arr"></span><span class="lbl"></span></button>
+  <div class="layout" id="layout">
     <div class="panel">
       <div class="panel-h">阈值参数 <span class="rst" id="resetBtn">恢复默认</span></div>
       <div class="panel-b" id="ctlBox"></div>
     </div>
-    <div>
+    <div class="content">
       <div class="cards" id="cards"></div>
       <div class="toolbar">
         <input class="search" id="search" placeholder="搜索关键词…">
@@ -141,8 +153,36 @@ tr:hover td{background:var(--subtle)}
 </div>
 <script src="重点词_分析数据.js"></script>
 <script>
-var DB=JSON.parse(document.getElementById('data').textContent);
+var DB=window.__KW_DATA__;
 var KW=DB.kw, META=DB.meta, NDAYS=META.days;
+// 双端平台：每个词存 mp(小程序)/app(APP) 原始数组；合计=两端逐日相加（前端算）
+var PLATS=META.platforms||['小程序'];
+var CUR_PLAT=PLATS.indexOf('合计')>=0?'合计':PLATS[0];
+function zeros(){return new Array(NDAYS).fill(0);}
+// 按所选平台，把 k.u/c/r/g/p 指向对应数组；metrics()/classify() 不变，照常读这些字段
+function applyPlatform(plat){
+  CUR_PLAT=plat;
+  var FS=['u','c','r','g','p'];
+  KW.forEach(function(k){
+    var src;
+    if(plat==='小程序') src=k.mp;
+    else if(plat==='APP') src=k.app;
+    else { // 合计
+      src={}; FS.forEach(function(f){
+        var a=k.mp&&k.mp[f], b=k.app&&k.app[f], o=new Array(NDAYS), i;
+        for(i=0;i<NDAYS;i++) o[i]=(a?a[i]:0)+(b?b[i]:0);
+        src[f]=o;
+      });
+    }
+    if(!src) src={u:zeros(),c:zeros(),r:zeros(),g:zeros(),p:zeros()};
+    k.u=src.u;k.c=src.c;k.r=src.r;k.g=src.g;k.p=src.p;
+  });
+}
+function setPlatform(plat){
+  applyPlatform(plat);
+  document.querySelectorAll('.pfbtn').forEach(function(x){x.classList.toggle('on',x.dataset.pf===plat)});
+  resetPages(); recompute(); render();
+}
 var START=new Date(META.start+'T00:00:00');
 var A=NDAYS-1, PAGE=10;   // anchor = end-date day index (inclusive)
 function idxDate(i){var d=new Date(START);d.setDate(d.getDate()+i);return d;}
@@ -267,15 +307,14 @@ function spark(k){
   var X=function(i){return n>1?pad+i*(W-2*pad)/(n-1):W/2;};
   var Y=function(v){return H-pad-(v-mn)/rng*(H-2*pad);};
   var pts=plot.map(function(v,i){return X(i).toFixed(1)+','+Y(v).toFixed(1);});
-  var col=(plot[n-1]>=plot[0])?'#00b42a':'#f5222d';
   // 波峰/波谷索引
   var maxI=0,minI=0; for(i=1;i<plot.length;i++){ if(plot[i]>plot[maxI])maxI=i; if(plot[i]<plot[minI])minI=i; }
   var dots='';
   for(i=0;i<n;i++){
     var cx=X(i).toFixed(1), cy=Y(plot[i]).toFixed(1);
-    if(i===n-1)      dots+='<circle cx="'+cx+'" cy="'+cy+'" r="2.6" fill="'+col+'"/>';
-    else if(i===maxI)dots+='<circle cx="'+cx+'" cy="'+cy+'" r="2.3" fill="#00b42a"/>';
-    else if(i===minI)dots+='<circle cx="'+cx+'" cy="'+cy+'" r="2.3" fill="#f5222d"/>';
+    if(i===maxI)     dots+='<circle cx="'+cx+'" cy="'+cy+'" r="2.6" fill="#00b42a"/>';       // 波峰
+    else if(i===minI)dots+='<circle cx="'+cx+'" cy="'+cy+'" r="2.6" fill="#f5222d"/>';       // 波谷
+    else if(i===n-1) continue;                                                                // 当前周非峰谷不标记
     else             dots+='<circle cx="'+cx+'" cy="'+cy+'" r="1.5" fill="#fff" stroke="#b6bcc6" stroke-width="1"/>';
   }
   // 每周一个透明 hit 区，自定义浮层提示"日期区间 + 当周日均"
@@ -389,6 +428,11 @@ dateSel.onchange=function(){ var i=isoIdx(dateSel.value); if(isNaN(i)){setA(A);r
 document.getElementById('cwPrev').onclick=function(){setA(A-1)};
 document.getElementById('cwNext').onclick=function(){setA(A+1)};
 
+// 平台切换器 + 标题徽标 + 数据范围说明
+document.getElementById('pfSel').innerHTML=PLATS.map(function(p){return '<button class="pfbtn'+(p===CUR_PLAT?' on':'')+'" data-pf="'+p+'">'+p+'</button>'}).join('');
+document.querySelectorAll('.pfbtn').forEach(function(el){el.onclick=function(){setPlatform(el.dataset.pf)};});
+document.getElementById('badge').textContent='双端 '+META.start.slice(5).replace('-','')+'–'+META.end.slice(5).replace('-','');
+document.getElementById('noteRange').textContent=NDAYS+' 天（'+META.start+' ~ '+META.end+'）·小程序+APP双端';
 document.getElementById('divs').innerHTML=DIVS.map(function(d){return '<button class="dbtn'+(d==='全部'?' on':'')+'" data-d="'+d+'">'+d+'</button>'}).join('');
 document.querySelectorAll('.dbtn').forEach(function(el){el.onclick=function(){divFilter=el.dataset.d;document.querySelectorAll('.dbtn').forEach(function(x){x.classList.toggle('on',x.dataset.d===divFilter)});resetPages();render();};});
 document.getElementById('search').addEventListener('input',function(e){searchTerm=e.target.value.trim();resetPages();render();});
@@ -402,7 +446,17 @@ document.addEventListener('mousemove',function(e){
   else if(tipEl.style.opacity!=='0'){ tipEl.style.opacity='0'; }
 });
 
-buildControls(); setA(NDAYS-1);
+var ctlCollapsed=true; // 阈值抽屉默认收起，词库满屏展开
+var layoutEl=document.getElementById('layout');
+function applyCtlCollapse(){
+  layoutEl.classList.toggle('collapsed',ctlCollapsed);
+  var tab=document.getElementById('ctlToggle');
+  tab.querySelector('.arr').textContent=ctlCollapsed?'›':'‹';
+  tab.querySelector('.lbl').textContent=ctlCollapsed?'展开阈值参数':'收起阈值参数';
+}
+document.getElementById('ctlToggle').onclick=function(){ ctlCollapsed=!ctlCollapsed; applyCtlCollapse(); };
+
+buildControls(); applyCtlCollapse(); applyPlatform(CUR_PLAT); setA(NDAYS-1);
 </script>
 </body>
 </html>
