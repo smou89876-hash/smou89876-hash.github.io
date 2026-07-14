@@ -197,7 +197,7 @@ var BASECOLS=[['cur','日均搜索人数'],['pr','平均支付率'],['gmv','日�
 var CATS=[
  {k:'TOP',c:'#f5222d',cs:'#fef0f0',desc:'当前窗口日均搜索人数高于阈值的头部词',
   cols:BASECOLS.concat([['rank','平台排名']]),
-  p:[['top','当前7天日均 >','人',200,3000,50,1000]]},
+  p:[['top','当前7天日均 ≥','人',200,3000,50,2000]]},
  {k:'长期增长',c:'#00b42a',cs:'#eafff0',desc:'持续多周环比为正且 N 周累计增长达标（回看周期可调）',
   cols:BASECOLS.concat([['cum12','N周累计增长率'],['pos','环比正周']]),
   p:[['lg_weeks','回看周期 N','周',4,24,1,12],['lg_pos','环比为正周数 ≥','/11周',1,23,1,6],['lg_cum','N周累计增长率 ≥','%',0,500,10,100],['lg_cur','当前7天日均 ≥','人',0,800,10,300]]},
@@ -255,7 +255,7 @@ function deriveLong(m){
 function classify(k){
   var m=k._m;
   deriveLong(m);
-  var top=m.cur>T.top;
+  var top=m.cur>=T.top;
   var lg=m.cum12!=null && m.pos>=T.lg_pos && m.cum12>=T.lg_cum && m.cur>=T.lg_cur;
   var sg=m.wow!=null && m.wow>=T.sg_wow && m.cur>=T.sg_cur;
   var nw=m.base!=null && m.cur>=T.nw_cur && m.base<T.nw_base;
