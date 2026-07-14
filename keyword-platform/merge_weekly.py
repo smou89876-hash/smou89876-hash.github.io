@@ -8,7 +8,8 @@
 
 说明：
     - 合并是 UPSERT 语义：同 (日期, 关键词, 平台) 覆盖，重复运行幂等。
-    - Division 自动归一：FMCG 1/FMCG 2（含无空格写法）→ FOOD；出现未知值会停下。
+    - Division 原样透传，取最新一周的分类；出现此前没见过的取值只提示不拦截。
+      （归一类需求属偶发，按用户当次说明单独处理，不在本脚本内置规则。）
     - 数据体检不过（率值异常/列错位嫌疑）会停下，不写出任何文件。
     - Supabase 入库为尽力而为：失败只警告不阻塞（之后可 python3 db_ingest.py 补录，
       或用云端 rebuild-keyword-data workflow 从库全量重建对账）。
@@ -19,8 +20,6 @@ import db_ingest as di
 DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_JS = os.path.join(DIR, '重点词_分析数据.js')
 PLAT_KEY = {'小程序': 'mp', 'APP': 'app'}
-DIV_MAP = {'FMCG 1': 'FOOD', 'FMCG1': 'FOOD', 'FMCG 2': 'FOOD', 'FMCG2': 'FOOD'}
-DIV_KNOWN = {'FOOD', 'Fresh', 'Consumables', 'GM', 'CBEC'}
 
 
 def load_payload():
@@ -57,22 +56,17 @@ def main():
     if not files:
         sys.exit("目录里没有 xlsx 文件")
 
-    # 1) 解析 + 体检 + Division 归一
+    # 1) 解析 + 体检（division 原样透传；新取值只提示，归一类需求按用户说明单独处理）
+    known_divs = {k.get('d') for k in payload['kw'] if k.get('d')}
     all_rows = []
     for path in files:
         plat = di.platform_from_name(path)
         rows, st = di.parse_xlsx(path, plat)
         validate(rows, st['file'])
-        unknown = set()
-        rows2 = []
-        for r in rows:
-            div = DIV_MAP.get(r[3], r[3])
-            if div and div not in DIV_KNOWN:
-                unknown.add(div)
-            rows2.append((r[0], r[1], r[2], div, r[4], r[5], r[6], r[8], r[9]))
-        if unknown:
-            sys.exit(f"停止：{st['file']} 出现未知 Division 值 {sorted(unknown)}，请先确认归一规则。")
-        all_rows.extend(rows2)
+        all_rows.extend((r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[8], r[9]) for r in rows)
+        new_divs = {r[3] for r in rows if r[3] and r[0] > old_end} - known_divs
+        if new_divs:
+            print(f"  ℹ {st['file']} 出现新 Division 取值：{sorted(new_divs)}（原样保留，如需归一请说明）")
         print(f"  ✓ {st['file']}: {st['n']} 行 [{st['platform']}] {st['dmin']}~{st['dmax']}")
 
     # 2) 扩展日期轴（.js 不存日期轴明细，按 start + days 连续推算）
@@ -111,7 +105,9 @@ def main():
             kw_index[kw] = k
             payload['kw'].append(k)
             created += 1
-        elif div:
+        elif div and date > old_end:
+            # division 只由比现有数据更新的日期覆盖：目录里滞留的历史周文件
+            # 只能补数值，不能把旧分类（如已归一前的取值）倒灌回来
             k['d'] = div
         arr = k.get(pk)
         if arr is None:
